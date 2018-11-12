@@ -27,7 +27,8 @@
 	</style>
 </head>
 <body>
-    
+    <div id="year"></div>
+	<button type="button" id="playAnimation">Click Me!</button>
     <div id="box-one"></div>
     
     <script>
@@ -254,8 +255,8 @@
                 var max_gdp = d3.max(dataset, function(d) { return d.GDP;} );
                 var max_gci = d3.max(dataset, function(d) { return d.Global_Competitiveness_Index;} );
             
-                xScale.domain([1, max_gdp]);
-                yScale.domain([0, max_gci]);
+                xScale.domain([100, max_gdp + 10000000]);
+                yScale.domain([1, max_gci]);
                 
                 // Set max population value for circle radii
                 var max_pop = d3.max(dataset, function(d) { return d.Population;} );
@@ -314,7 +315,21 @@
                 // Generate the visualisation
                 generateVis();
                 
-                setInterval(function()	{	
+				var currentYear = setInterval(stopStart, 2000);
+				
+				function stopStart() {
+					document.getElementById("year").innerHTML = display_year; // temp year display
+                        display_year = display_year	+	1;	
+                        if(display_year > 2017){	
+                            display_year = 2007;	
+                        }
+
+                        // Generate the visualisation
+                        generateVis();
+				}
+				
+            /**    setInterval(function()	{
+					document.getElementById("year").innerHTML = display_year; // temp year display
                         display_year = display_year	+	1;	
                         if(display_year > 2017){	
                             display_year = 2007;	
@@ -323,8 +338,11 @@
                         // Generate the visualisation
                         generateVis();	
                 },	2000);
-                
-            }
+			**/
+				
+				$("#playAnimation").click(function() {
+					clearInterval(currentYear);
+				)};
 	   
         });
         
