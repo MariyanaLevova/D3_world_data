@@ -1,0 +1,55 @@
+#box-one {
+    width: 95%;
+    height: 500px;
+    margin-left: 5%;
+    margin-right: auto;
+    background-color: #fff;
+}
+
+.col-main {
+    padding: 0 !important;
+    margin-top: 2em;
+    margin-right: 0 !important;
+    height: 500px;
+}
+
+#box-right {
+    border-left-color: #000;
+    border-left-style: solid;
+    border-left-width: 1pt;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+#stopStartButton {
+    margin-top: 15em !important;
+}
+
+.buttons {
+    width: 70%;
+    margin-left: 12%;
+    margin-right: 18%;
+    padding: 0;
+    background-color: #fff;
+    color: #000;
+    font-family: sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    margin-top: 2em;
+    outline: 0 !important;
+    border-color: #000;
+    border-style: solid;
+    border-width: 1pt;
+    cursor: pointer;
+}
