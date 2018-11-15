@@ -6,7 +6,28 @@ function randomInt() {
     return Math.floor(Math.random() * Math.floor(10));
 }
 
+var value;
+
 d3.csv("GCI_CompleteData2.csv", function(error, data){
+	
+	//Drop down menu with Country Values
+	//Need to figure out how to remove duplicates and also slot the menu in the correct place
+	var select = d3.select(".dropdown2")
+      .append("div")
+      .append("select")
+
+    select
+      .on("change", function(d) {
+        var value = d3.select(this).property("value");
+        alert(value);
+      });
+
+    select.selectAll("option")
+      .data(data)
+      .enter()
+        .append("option")
+        .attr("value", function (d) { return d.Country; })
+        .text(function (d) { return d.Country; });
 
     // Define margins
     var margin = {top: 25, right: 25, bottom: 50, left: 50};
@@ -42,15 +63,48 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
     var yAxis = d3.axisLeft()
                       .scale(yScale)
                       .ticks(5);
+	
 
     //Create SVG element as a group with the margins transform applied to it
+	//Bubble Plot
     var svg = d3.select("#box-one")
                 .append("svg")
                 .attr("width", svg_width + margin.left + margin.right)
                 .attr("height", svg_height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+	//Create SVG element as a group with the margins transform applied to it
+	//Bar Chart
+    var svg2 = d3.select("#box-two")
+                .append("svg")
+                .attr("width", svg_width + margin.left + margin.right)
+                .attr("height", svg_height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+	//Set up the scale to be used on the x axis
+	//Bar Chart
+    var xScaleBar = d3.scaleLinear()
+                    .range([0, svg_width]);
 
+    //Set up the scale to be used on the y axis
+	//Bar Chart
+    var yScaleBar = d3.scaleLinear()
+                    .range([svg_height, 0]);
+
+		// Create an x-axis connected to the x scale
+	//Bar Chart
+    var xAxisBar = d3.axisBottom()
+                    .scale(xScaleBar)
+                    .ticks(12);
+
+    //Define Y axis
+	//Bar Chart
+    var yAxisBar = d3.axisLeft()
+                      .scale(yScaleBar)
+                      .ticks(10);
+	
     // Year
     var display_year = 2007;
 
@@ -203,6 +257,53 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                 });
 
     }
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	
+	// Function to generate Bar Chart
+	    function generateVisBar(){
+
+        // Filter data for year
+        var data_filtered = dataset.filter(yearFilter);
+		var country_filtered = value;
+		var barPadding = 5;
+		var barWidth = 50;
+
+        /******** HANDLE UPDATE SELECTION ************/
+	
+		// Append the rectangles for the bar chart
+        
+
+        /******** HANDLE ENTER SELECTION ************/
+        
+
+        /******** HANDLE EXIT SELECTION ************/
+        svg2.exit()
+            .transition()
+            .duration(500)
+            .attr("r", 0)
+            .remove();
+
+        // Changes year on svg canvas.
+        svg.selectAll("#year_text")
+            .data(data_filtered)
+                .text(function(d) {
+                    return d.Year;
+                });
+
+    }
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	
+	
 
     // handle any data loading errors
     if (error) {
@@ -217,6 +318,20 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                     d['GDP'] = +d['GDP'];
                     d['Global_Competitiveness_Index'] = +d['Global_Competitiveness_Index']; 
                     d['Population'] = +d['Population'];
+					d['Institutions'] = +d['1st_pillar_Institutions'];
+					d['Infrastructure'] = +d['2nd_pillar_Infrastructure'];
+					d['Macroeconomic Environment'] = +d['3rd_pillar_Macroeconomic_environment'];
+					d['Health and Primary Education'] = +d['4th_pillar_Health_and_primary_education'];
+					d['Higher Education and Training'] = +d['5th_pillar_Higher_education_and_training'];
+					d['Goods Market Efficiency'] = +d['6th_pillar_Goods_market_efficiency'];
+					d['Labor Market Efficiency'] = +d['7th_pillar_Labor_market_efficiency'];
+					d['Financial Market Development'] = +d['8th_pillar_Financial_market_development'];
+					d['Technological Readiness'] = +d['9th_pillar_Technological_readiness'];
+					d['Market Size'] = +d['10th_pillar_Market_size'];
+					d['Business Sophistication'] = +d['11th_pillar_Business_sophistication_'];
+					d['Innovation'] = +d['12th_pillar_Innovation'];
+			
+					
                 });	
 
         // Assign the data object loaded to the global dataset variable
@@ -226,8 +341,10 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
         var max_gdp = d3.max(dataset, function(d) { return d.GDP;} );
         var max_gci = d3.max(dataset, function(d) { return d.Global_Competitiveness_Index;} );
 
-        xScale.domain([100, max_gdp + 10000000]);
-        yScale.domain([1, max_gci]);
+        xScale.domain([100, max_gdp + 100000]);
+        yScale.domain([1, max_gci+1]);
+		xScaleBar.domain([0, 12]);
+		yScaleBar.domain([0, 10]);
 
         // Set max population value for circle radii
         var max_pop = d3.max(dataset, function(d) { return d.Population;} );
@@ -284,6 +401,62 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                 .attr("id", "year_text")
                 .text(display_year);
 
+		// Create the x-axis
+		//Bar Chart
+        svg2.append("g")
+            .attr("class", "axis")
+            .attr("id", "x-axis")
+            .attr("transform", "translate(0," + svg_height + ")")
+            .call(xAxisBar)
+            .append("text")
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "20px")
+                .attr("stroke", "#000")
+                .attr("fill", "#000")
+                .attr("x", "440")
+                .attr("y", "40")
+                .attr("dy", ".15em")
+                .text("12 Pillars");
+
+        // Create the y axis
+		//Bar Chart
+        svg2.append("g")
+            .attr("class", "axis")
+            .attr("id", "y-axis")
+            .call(yAxisBar)
+            .append("text")
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "20px")
+                .attr("stroke", "#000")
+                .attr("fill", "#000")
+                .attr("x", "-150")
+                .attr("y", "-25")
+                .attr("dy", ".15em")
+                .attr("transform", "rotate(-90)")
+                .text("Pillar Value");
+
+        // SVG canvas background
+		//Bar Chart
+        svg2.append("rect")
+            .attr("x", "0")
+            .attr("y", "0")
+            .attr("fill", "#000")
+            .attr("height", "425px")
+            .attr("width", "925px");
+
+        // SVG canvas year
+		//Bar Chart
+        svg2.append("text")
+                .attr("x", "50")
+                .attr("y", "50")
+                .attr("dy", "1em")
+                .attr("font-size", "100px")
+                .attr("font-family", "sans-serif")
+                .attr("stroke", "#fff")
+                .attr("id", "year_text")
+                .text(display_year);
+		
+		
         // Generate the visualisation
         generateVis();
 
@@ -296,7 +469,8 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
             if(display_year > 2017) display_year = 2007;
 
             // Generate the visualisation
-            generateVis();	
+            generateVis();
+			generateVisBar();
         }
 
         // Loop boolean check
