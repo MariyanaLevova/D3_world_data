@@ -6,7 +6,7 @@ function randomInt() {
     return Math.floor(Math.random() * Math.floor(10));
 }
 
-var value;
+var selected_country;
 
 d3.csv("GCI_CompleteData2.csv", function(error, data){
 	
@@ -18,8 +18,8 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
     select
       .on("change", function(d) {
-        var value = d3.select(this).property("value");
-        alert(value);
+        selected_country = d3.select(this).property("value");
+        alert(selected_country);
       });
 
     select.selectAll("option")
@@ -85,9 +85,11 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 	
 	//Set up the scale to be used on the x axis
 	//Bar Chart
-    var xScaleBar = d3.scaleLinear()
-                    .range([0, svg_width]);
-
+    var xScaleBar = d3.scaleBand()
+                    .range([0, svg_width], 0.1)
+					.paddingInner(0.05)
+					.paddingOuter(0.05);
+						
     //Set up the scale to be used on the y axis
 	//Bar Chart
     var yScaleBar = d3.scaleLinear()
@@ -103,14 +105,22 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 	//Bar Chart
     var yAxisBar = d3.axisLeft()
                       .scale(yScaleBar)
-                      .ticks(10);
+                      .ticks(7);
 	
     // Year
     var display_year = 2007;
+	
+	//Country
+	var display_country = "Bulgaria";
 
     // Year function
     function yearFilter(value){
         return (value.Year == display_year);
+     }
+	
+	// Country function
+    function countryFilter(value){
+        return (value.Year == display_country);
      }
 
     // Format year
@@ -267,29 +277,58 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 	// Function to generate Bar Chart
 	    function generateVisBar(){
 
-        // Filter data for year
+        // Filter data for country and year
+		//var year_filter = dataset.filter(yearFilter);
+       // var data_filtered = year_filter.filter(countryFilter);
         var data_filtered = dataset.filter(yearFilter);
-		var country_filtered = value;
+		var country_filtered = selected_country;
 		var barPadding = 5;
 		var barWidth = 50;
 
         /******** HANDLE UPDATE SELECTION ************/
-	
 		// Append the rectangles for the bar chart
-        
+		svg2.selectAll("rect")
+			.data(data_filtered)
+            .transition()
+            .duration(500)
+            .ease(d3.easeCubic)
+			.attr("x", function(d) {
+				   	return xScaleBar(d.Country);
+			})
+			.attr("y", function(d) {
+				   	return yScaleBar(+d.Innovation);
+			})
+			.attr("width", xScaleBar.bandwidth())
+			.attr("height", function(d) {
+				   	return svg_height - yScaleBar(+d.Innovation);
+			})
+			 .style("fill", "steelblue");        
 
         /******** HANDLE ENTER SELECTION ************/
-        
+		svg2.selectAll("rect")
+			.data(data_filtered)
+			.enter()
+				.append("rect")
+				.attr("x", function(d) {
+						return d.Country;
+				})
+				.attr("y", function(d) {
+						return yScaleBar(+d.Innovation);
+				})
+				.attr("width", xScaleBar.bandwidth())
+				.attr("height", function(d) {
+						return svg_height - yScaleBar(+d.Innovation);
+				})
+				 .style("fill", "steelblue");
 
         /******** HANDLE EXIT SELECTION ************/
         svg2.exit()
             .transition()
             .duration(500)
-            .attr("r", 0)
             .remove();
 
         // Changes year on svg canvas.
-        svg.selectAll("#year_text")
+        svg2.selectAll("#year_text")
             .data(data_filtered)
                 .text(function(d) {
                     return d.Year;
