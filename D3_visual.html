@@ -22,59 +22,57 @@
     
     <!-- Main JS file -->
     <script src="main.js"></script>
+    
+    <!-- Select2 Menu -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.full.js"></script>
 </head>
 <body>
     
     <div class="row">
-	   <div class="col-sm-10 col-main" id="box-left">
+	   <div class="col-sm-10 col-main box-left">
            
-            <div id="box-one"></div>
+            <div class="box">
+                <div id="box-one"></div>
+            </div>
+           
+            <div class="box">
+                <div id="box-two"></div>
+            </div>
            
         </div>
         
-        <div class="col-sm-2 col-main" id="box-right">
+        <div class="col-sm-2 col-main">
             
-            <button id="stopStartButton" role="button" class="buttons">Stop</button>
+            <div id="box-right">
             
-            <div class="dropdown">
-              <button class="dropdown-toggle buttons" type="button" data-toggle="dropdown">Select Year
-              <span class="caret"></span></button>
-              <ul class="dropdown-menu" id="yearDropdown">
-                <li><a class="yearSelect" id="2007" href="#">2007</a></li>
-                <li><a class="yearSelect" id="2008" href="#">2008</a></li>
-                <li><a class="yearSelect" id="2009" href="#">2009</a></li>
-                <li><a class="yearSelect" id="2010" href="#">2010</a></li>
-                <li><a class="yearSelect" id="2011" href="#">2011</a></li>
-                <li><a class="yearSelect" id="2012" href="#">2012</a></li>
-                <li><a class="yearSelect" id="2013" href="#">2013</a></li>
-                <li><a class="yearSelect" id="2014" href="#">2014</a></li>
-                <li><a class="yearSelect" id="2015" href="#">2015</a></li>
-                <li><a class="yearSelect" id="2016" href="#">2016</a></li>
-                <li><a class="yearSelect" id="2017" href="#">2017</a></li>
-              </ul>
+                <button id="stopStartButton" role="button" class="buttons">Stop</button>
+
+                <div class="dropdown">
+                  <button class="dropdown-toggle buttons" type="button" data-toggle="dropdown">Select Year
+                  <span class="caret"></span></button>
+                  <ul class="dropdown-menu" id="yearDropdown">
+                    <li><a class="yearSelect" id="2007" href="#">2007</a></li>
+                    <li><a class="yearSelect" id="2008" href="#">2008</a></li>
+                    <li><a class="yearSelect" id="2009" href="#">2009</a></li>
+                    <li><a class="yearSelect" id="2010" href="#">2010</a></li>
+                    <li><a class="yearSelect" id="2011" href="#">2011</a></li>
+                    <li><a class="yearSelect" id="2012" href="#">2012</a></li>
+                    <li><a class="yearSelect" id="2013" href="#">2013</a></li>
+                    <li><a class="yearSelect" id="2014" href="#">2014</a></li>
+                    <li><a class="yearSelect" id="2015" href="#">2015</a></li>
+                    <li><a class="yearSelect" id="2016" href="#">2016</a></li>
+                    <li><a class="yearSelect" id="2017" href="#">2017</a></li>
+                  </ul>
+                </div>
+                
+                <select id="countrySelect">
+                </select>
+                
             </div>
         
         </div>
     </div>
-	
-	    <div class="row">
-	   <div class="col-sm-10 col-main" id="box-left">
-           
-            <div id="box-two"></div>
-           
-        </div>
-			<div class="col-sm-2 col-main" id="box-right">
-            
-            <button id="stopStartButton" role="button" class="buttons">Stop</button>
-            
-            <div class="dropdown2">
-              <button class="dropdown-toggle buttons" type="button" data-toggle="dropdown">Select Country
-              <span class="caret"></span></button>
-              
-            </div>
-        
-        </div>
-		</div>
     
 </body>	 
 </html>

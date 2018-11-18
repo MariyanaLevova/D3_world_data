@@ -1,22 +1,28 @@
-#box-one {
-    width: 95%;
-    height: 500px;
-    margin-left: 5%;
+body {
+    overflow-x: hidden;
+}
+
+.box {
+    width: 100%;
+    margin-left: auto;
     margin-right: auto;
-    background-color: #fff;
+    background-color: yellow;
 }
 
 .col-main {
     padding: 0 !important;
-    margin-top: 2em;
-    margin-right: 0 !important;
-    height: 500px;
 }
 
 #box-right {
     border-left-color: #000;
     border-left-style: solid;
     border-left-width: 1pt;
+    position: fixed;
+    background-color: #fff;
+    width: auto;
+    padding-top: 150px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .axis path,
@@ -27,19 +33,16 @@
 }
 
 .axis text {
-    font-family: sans-serif;
+    font-family: 'Montserrat', sans-serif;
     font-size: 14px;
     font-weight: normal;
 }
 
-#stopStartButton {
-    margin-top: 15em !important;
-}
-
 .buttons {
-    width: 70%;
-    margin-left: 12%;
-    margin-right: 18%;
+    width: 12em;
+    height: 3em;
+    margin-left: auto;
+    margin-right: auto;
     padding: 0;
     background-color: #fff;
     color: #000;
@@ -52,4 +55,55 @@
     border-style: solid;
     border-width: 1pt;
     cursor: pointer;
+}
+
+.selectDrop {
+    display: block;
+    margin-top: 2em;
+    color: #000;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+    border-color: #000;
+    border-width: 1pt;
+    border-style: solid;
+    background-color: #fff;
+    outline: none;
+    text-align: center;
+    padding-top: 1em;
+    padding-bottom: 2em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.selectDropMenu {
+    color: #000;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+    text-align: left;
+    border-color: #000;
+    border-width: 1pt;
+    border-style: solid;
+    background-color: #fff;
+}
+
+.select2-results {
+    background-color: #fff;
+    height: 200px;
+    overflow-y: scroll;
+    border-color: #000;
+    outline: none;
+}
+
+.select2-search__field, .select2-search__field:focus, .select2-search__field:active {
+    background-color: #fff;
+    border-color: #000;
+    border-style: solid;
+    border-width: 1pt;
+    color: #000;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+    outline: none;
 }

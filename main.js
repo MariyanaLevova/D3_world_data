@@ -9,25 +9,6 @@ function randomInt() {
 var selected_country;
 
 d3.csv("GCI_CompleteData2.csv", function(error, data){
-	
-	//Drop down menu with Country Values
-	//Need to figure out how to remove duplicates and also slot the menu in the correct place
-	var select = d3.select(".dropdown2")
-      .append("div")
-      .append("select")
-
-    select
-      .on("change", function(d) {
-        selected_country = d3.select(this).property("value");
-        alert(selected_country);
-      });
-
-    select.selectAll("option")
-      .data(data)
-      .enter()
-        .append("option")
-        .attr("value", function (d) { return d.Country; })
-        .text(function (d) { return d.Country; });
 
     // Define margins
     var margin = {top: 25, right: 25, bottom: 50, left: 50};
@@ -107,28 +88,30 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                       .scale(yScaleBar)
                       .ticks(7);
 	
-    // Year
+    // Year.
     var display_year = 2007;
-	
-	//Country
-	var display_country = "Bulgaria";
 
-    // Year function
+    // Year function.
     function yearFilter(value){
         return (value.Year == display_year);
      }
-	
-	// Country function
-    function countryFilter(value){
-        return (value.Year == display_country);
-     }
 
-    // Format year
+    // Format year.
     var formatYear = d3.timeParse("%Y");
+    
+    // Setting height of DIV containers.
+    $(".box").css({"height":$(window).height()});
+    $("#box-right").css({"height":$(window).height()});
+    
+    // Setting padding for DIV containers.
+    $("#box-one").css({"padding-left":($(".box").width() - 1000)/2});
+    $("#box-one").css({"padding-top":($(".box").height() - 500)/2});
+    $("#box-two").css({"padding-left":($(".box").width() - 1000)/2});
+    $("#box-two").css({"padding-top":($(".box").height() - 500)/2});
 
     function generateVis(){
 
-        // Filter data for year
+        // Filter data for year.
         var data_filtered = dataset.filter(yearFilter);
 
         /******** HANDLE UPDATE SELECTION ************/
@@ -189,7 +172,8 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                     .style("fill", function(d,i) {
                         return colorBrewer[randomInt()];
                     })
-                    .style("opacity", "0.8");
+                    .style("opacity", "0.8")
+                    .style("cursor", "pointer");
 
         /******** HANDLE EXIT SELECTION ************/
         svg.exit()
@@ -257,6 +241,12 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                     d3.select("#country-pop-title").remove();
                     // Remove country population.
                     d3.select("#country-pop").remove();
+                })
+                .on("click", function(d) {
+                    generateVisBar(d);
+                    $('html, body').animate({
+                        scrollTop: $("#box-two").offset().top
+                    }, 800);
                 });
 
         // Changes year on svg canvas.
@@ -275,20 +265,15 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 	
 	
 	// Function to generate Bar Chart
-	    function generateVisBar(){
-
-        // Filter data for country and year
-		//var year_filter = dataset.filter(yearFilter);
-       // var data_filtered = year_filter.filter(countryFilter);
-        var data_filtered = dataset.filter(yearFilter);
-		var country_filtered = selected_country;
+    function generateVisBar(data){
+        
 		var barPadding = 5;
 		var barWidth = 50;
 
         /******** HANDLE UPDATE SELECTION ************/
 		// Append the rectangles for the bar chart
 		svg2.selectAll("rect")
-			.data(data_filtered)
+			.data(data)
             .transition()
             .duration(500)
             .ease(d3.easeCubic)
@@ -306,11 +291,11 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
         /******** HANDLE ENTER SELECTION ************/
 		svg2.selectAll("rect")
-			.data(data_filtered)
+			.data(data)
 			.enter()
 				.append("rect")
 				.attr("x", function(d) {
-						return d.Country;
+						return xScaleBar(d.Country);
 				})
 				.attr("y", function(d) {
 						return yScaleBar(+d.Innovation);
@@ -329,11 +314,11 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
         // Changes year on svg canvas.
         svg2.selectAll("#year_text")
-            .data(data_filtered)
+            .data(data)
                 .text(function(d) {
                     return d.Year;
                 });
-
+            
     }
 	
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -369,8 +354,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 					d['Market Size'] = +d['10th_pillar_Market_size'];
 					d['Business Sophistication'] = +d['11th_pillar_Business_sophistication_'];
 					d['Innovation'] = +d['12th_pillar_Innovation'];
-			
-					
                 });	
 
         // Assign the data object loaded to the global dataset variable
@@ -441,7 +424,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                 .text(display_year);
 
 		// Create the x-axis
-		//Bar Chart
+		// Bar Chart
         svg2.append("g")
             .attr("class", "axis")
             .attr("id", "x-axis")
@@ -458,7 +441,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                 .text("12 Pillars");
 
         // Create the y axis
-		//Bar Chart
+		// Bar Chart
         svg2.append("g")
             .attr("class", "axis")
             .attr("id", "y-axis")
@@ -475,7 +458,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                 .text("Pillar Value");
 
         // SVG canvas background
-		//Bar Chart
+		// Bar Chart
         svg2.append("rect")
             .attr("x", "0")
             .attr("y", "0")
@@ -484,10 +467,10 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
             .attr("width", "925px");
 
         // SVG canvas year
-		//Bar Chart
+		// Bar Chart
         svg2.append("text")
-                .attr("x", "50")
-                .attr("y", "50")
+                .attr("x", "350")
+                .attr("y", "250")
                 .attr("dy", "1em")
                 .attr("font-size", "100px")
                 .attr("font-family", "sans-serif")
@@ -508,8 +491,8 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
             if(display_year > 2017) display_year = 2007;
 
             // Generate the visualisation
-            generateVis();
-			generateVisBar();
+            //generateVis();
+
         }
 
         // Loop boolean check
@@ -528,6 +511,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
             }
         });
         
+        // For selecting a specific year from dropdown.
         $(".yearSelect").click(function(){
            // Stop loop if running.
            if (playLoop === true) {
@@ -540,7 +524,29 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
             // Generate the visualisation
             generateVis();	
         });
-
+        
+        // Dropdown menu for selecting countries.
+        // Has search functionality.
+        $("#countrySelect").select2({
+                theme: 'bootstrap',
+                width: '100%',
+                containerCssClass: 'selectDrop',
+                dropdownCssClass: 'selectDropMenu' 
+        });
+        
+        // Set for storing unique occurrences of countries in dataset.
+        var countryList = new Set();
+        
+        // Loop through dataset, adding countries to set.
+        for (i = 0; i < dataset.length; i++) {
+            countryList.add(dataset[i]['Country']);
+        }
+        
+        // Populate dropdown from country names in set.
+        for (let item of countryList) {
+            $("#countrySelect").append("<option value=" + item + ">" + item + "</option>");
+        };
+        
     }
 
 });
