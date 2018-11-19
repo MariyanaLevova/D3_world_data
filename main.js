@@ -21,6 +21,8 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
     // The global data set object
     var dataset;
+	
+	// Bubble Plot
 
     // Set up the scale to be used on the x axis
     xScale = d3.scaleLog()
@@ -55,32 +57,49 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	
+	// Bar Chart
+	
+	// Store column names in array so can reference below
+            var columnNames = [
+                'Institutions',
+                'Infrastructure',
+                'Macroeconomic Environment',
+                'Health and Primary Education',
+                'Higher Education and Training',
+                'Goods Market Efficiency',
+                'Labor Market Efficiency',
+                'Financial Market Development',
+                'Technological Readiness',
+                'Market Size',
+                'Business Sophistication',
+                'Innovation'
+            ];
+	
 	//Create SVG element as a group with the margins transform applied to it
-	//Bar Chart
-    var svg2 = d3.select("#box-two")
-                .append("svg")
-                .attr("width", svg_width + margin.left + margin.right)
-                .attr("height", svg_height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	var svgBar = d3.select("#box-two")
+					.append("svg")
+					.attr("width", svg_width + margin.left + margin.right)
+					.attr("height", svg_height + margin.top + margin.bottom)
+					.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	
 	//Set up the scale to be used on the x axis
-	//Bar Chart
     var xScaleBar = d3.scaleBand()
-                    .range([0, svg_width], 0.1)
+                    .range([0, svg_width], 0.5)
 					.paddingInner(0.05)
 					.paddingOuter(0.05);
 						
     //Set up the scale to be used on the y axis
 	//Bar Chart
     var yScaleBar = d3.scaleLinear()
-                    .range([svg_height, 0]);
+				    .domain([0, 7])
+				    .range([svg_height, 0]);
 
 		// Create an x-axis connected to the x scale
 	//Bar Chart
     var xAxisBar = d3.axisBottom()
                     .scale(xScaleBar)
-                    .ticks(12);
+                    .tickFormat([null]);
 
     //Define Y axis
 	//Bar Chart
@@ -95,6 +114,8 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
     function yearFilter(value){
         return (value.Year == display_year);
      }
+	
+
 
     // Format year.
     var formatYear = d3.timeParse("%Y");
@@ -258,77 +279,110 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
     }
 	
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	
-	
 	// Function to generate Bar Chart
     function generateVisBar(data){
+		
+		console.log(data);
+		
+	// Country function
+	function countryFilter(value){
+		return (value.Country == data.Country);
+	}
+		
+		 // Filter the data as before
+            var filtered_dataset = dataset.filter(yearFilter);
+            var country_filtered = filtered_dataset.filter(countryFilter);
         
-		var barPadding = 5;
-		var barWidth = 50;
+		 // Loop through every element in the filtered dataset and add to array dataHold
+         // Doing this because otherwise the D3 functions only run once.
+         // The arrayHold will hold 12 objects each composed of one of the columns from the CSV
+         // The D3 functions will use arrayHold              // They will now iterate 12 times - one iteration for each column.
+		
+         dataHold = []
+         for (i = 0; i < columnNames.length; i++) {
+			var temp = columnNames[i];
+			// Create object
+			var tempObj = {};
+			// Add column to object with key = 'Column' and value = Innovation etc.
+			// The key value ('Column') is the same for all CSV columns
+			// It means in the D3 functions below I can just say d3.Column to call it.
+			tempObj["Column"] = country_filtered[0][temp];
+			// Append object to dataHold to create new row in array
+			dataHold.push(tempObj);
+		}
+		
+		    // Update the domain of the x scale
+            xScaleBar.domain(dataHold.map(function(d, i) { return d.Column; }));
+            // Call the x-axis
+            svgBar.select("#x-axis").call(xAxisBar);
+		
+			/******** PERFORM DATA JOIN ************/
+			// Join new data with old elements, if any.
+			var bars = 	svgBar.selectAll("rect")
+				   /*.data(dataHold, function key(d) {
+											return d.Country;
+										});*/
+                    .data(dataHold);
 
         /******** HANDLE UPDATE SELECTION ************/
 		// Append the rectangles for the bar chart
-		svg2.selectAll("rect")
-			.data(data)
-            .transition()
-            .duration(500)
-            .ease(d3.easeCubic)
+		
+		bars
+			.transition()
+			.duration(500)
+			.ease(d3.easeCubic)
 			.attr("x", function(d) {
-				   	return xScaleBar(d.Country);
-			})
-			.attr("y", function(d) {
-				   	return yScaleBar(+d.Innovation);
-			})
-			.attr("width", xScaleBar.bandwidth())
-			.attr("height", function(d) {
-				   	return svg_height - yScaleBar(+d.Innovation);
-			})
-			 .style("fill", "steelblue");        
+				return xScaleBar(+d.Column);
+		   })
+		   .attr("y", function(d) {
+				return yScaleBar(+d.Column) ;
+		   })
+		   .attr("width", xScaleBar.bandwidth())
+		   .attr("height", function(d) {
+				return svg_height - yScaleBar(+d.Column);
+		   })
+		   .style("fill", "steelblue");
+       
 
         /******** HANDLE ENTER SELECTION ************/
-		svg2.selectAll("rect")
-			.data(data)
-			.enter()
-				.append("rect")
-				.attr("x", function(d) {
-						return xScaleBar(d.Country);
-				})
-				.attr("y", function(d) {
-						return yScaleBar(+d.Innovation);
-				})
-				.attr("width", xScaleBar.bandwidth())
-				.attr("height", function(d) {
-						return svg_height - yScaleBar(+d.Innovation);
-				})
-				 .style("fill", "steelblue");
+		bars.enter()
+		   .append("rect")
+			.transition()
+			.duration(500)
+			.ease(d3.easeCubic)
+		   .attr("x", function(d, i) {
+				return xScaleBar(+d.Column);
+		   })
+		   .attr("y", function(d, i) {
+				return yScaleBar(+d.Column) ;
+		   })
+		   .attr("width", xScaleBar.bandwidth())
+		   .attr("height", function(d, i) {
+				return svg_height - yScaleBar(+d.Column);
+		   })
+		   .style("fill", "steelblue");
+
+			// Could maybe use this to show a comparison between two countries?
+		  // .style("fill", function(d, i) { if (i % 2 == 0) { return "Blue"; } else { return "Red"; } });
 
         /******** HANDLE EXIT SELECTION ************/
-        svg2.exit()
-            .transition()
-            .duration(500)
-            .remove();
+		// Remove bars that not longer have a matching data eleement
+		bars.exit()
+			.style("fill", "Red")
+			.transition()
+			.duration(500)
+			.attr("r", 0)
+			.remove();
 
         // Changes year on svg canvas.
-        svg2.selectAll("#year_text")
-            .data(data)
+        svgBar.selectAll("#year_text")
+            .data(country_filtered)
                 .text(function(d) {
-                    return d.Year;
+                    return d.Year + " " + d.Country;
                 });
             
     }
 	
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-	
-	
-
     // handle any data loading errors
     if (error) {
         console.log("Something went wrong");
@@ -365,8 +419,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
         xScale.domain([100, max_gdp + 100000]);
         yScale.domain([1, max_gci+1]);
-		xScaleBar.domain([0, 12]);
-		yScaleBar.domain([0, 10]);
 
         // Set max population value for circle radii
         var max_pop = d3.max(dataset, function(d) { return d.Population;} );
@@ -425,7 +477,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
 		// Create the x-axis
 		// Bar Chart
-        svg2.append("g")
+        svgBar.append("g")
             .attr("class", "axis")
             .attr("id", "x-axis")
             .attr("transform", "translate(0," + svg_height + ")")
@@ -442,7 +494,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
         // Create the y axis
 		// Bar Chart
-        svg2.append("g")
+        svgBar.append("g")
             .attr("class", "axis")
             .attr("id", "y-axis")
             .call(yAxisBar)
@@ -459,7 +511,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
         // SVG canvas background
 		// Bar Chart
-        svg2.append("rect")
+        svgBar.append("rect")
             .attr("x", "0")
             .attr("y", "0")
             .attr("fill", "#000")
@@ -468,9 +520,9 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
         // SVG canvas year
 		// Bar Chart
-        svg2.append("text")
-                .attr("x", "350")
-                .attr("y", "250")
+        svgBar.append("text")
+                .attr("x", "50")
+                .attr("y", "0")
                 .attr("dy", "1em")
                 .attr("font-size", "100px")
                 .attr("font-family", "sans-serif")
@@ -491,7 +543,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
             if(display_year > 2017) display_year = 2007;
 
             // Generate the visualisation
-            //generateVis();
+            generateVis();
 
         }
 
