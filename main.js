@@ -60,20 +60,20 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 	// Bar Chart
 	
 	// Store column names in array so can reference below
-            var columnNames = [
-                'Institutions',
-                'Infrastructure',
-                'Macroeconomic Environment',
-                'Health and Primary Education',
-                'Higher Education and Training',
-                'Goods Market Efficiency',
-                'Labor Market Efficiency',
-                'Financial Market Development',
-                'Technological Readiness',
-                'Market Size',
-                'Business Sophistication',
-                'Innovation'
-            ];
+    var columnNames = [
+        'Institutions',
+        'Infrastructure',
+        'Macroeconomic Environment',
+        'Health and Primary Education',
+        'Higher Education and Training',
+        'Goods Market Efficiency',
+        'Labor Market Efficiency',
+        'Financial Market Development',
+        'Technological Readiness',
+        'Market Size',
+        'Business Sophistication',
+        'Innovation'
+    ];
 	
 	//Create SVG element as a group with the margins transform applied to it
 	var svgBar = d3.select("#box-two")
@@ -114,8 +114,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
     function yearFilter(value){
         return (value.Year == display_year);
      }
-	
-
 
     // Format year.
     var formatYear = d3.timeParse("%Y");
@@ -282,16 +280,14 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 	// Function to generate Bar Chart
     function generateVisBar(data){
 		
-		console.log(data);
+        // Country function
+        function countryFilter(value){
+            return (value.Country == data.Country);
+        }
 		
-	// Country function
-	function countryFilter(value){
-		return (value.Country == data.Country);
-	}
-		
-		 // Filter the data as before
-            var filtered_dataset = dataset.filter(yearFilter);
-            var country_filtered = filtered_dataset.filter(countryFilter);
+        // Filter the data as before
+        var filtered_dataset = dataset.filter(yearFilter);
+        var country_filtered = filtered_dataset.filter(countryFilter);
         
 		 // Loop through every element in the filtered dataset and add to array dataHold
          // Doing this because otherwise the D3 functions only run once.
@@ -310,20 +306,21 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 			// Append object to dataHold to create new row in array
 			dataHold.push(tempObj);
 		}
+        //console.log(dataHold);
 		
-		    // Update the domain of the x scale
-            xScaleBar.domain(dataHold.map(function(d, i) { return d.Column; }));
-            // Call the x-axis
-            svgBar.select("#x-axis").call(xAxisBar);
-		
-			/******** PERFORM DATA JOIN ************/
-			// Join new data with old elements, if any.
-			var bars = 	svgBar.selectAll("rect")
-				   /*.data(dataHold, function key(d) {
-											return d.Country;
-										});*/
-                    .data(dataHold);
+        // Update the domain of the x scale
+        xScaleBar.domain(dataHold.map(function(d, i) { return d.Column; }));
+        // Call the x-axis
+        svgBar.select("#x-axis").call(xAxisBar);
 
+        /******** PERFORM DATA JOIN ************/
+        // Join new data with old elements, if any.
+        var bars = 	svgBar.selectAll("rect")
+               /*.data(dataHold, function key(d) {
+                                        return d.Country;
+                                    });*/
+                .data(dataHold);
+        
         /******** HANDLE UPDATE SELECTION ************/
 		// Append the rectangles for the bar chart
 		
@@ -331,7 +328,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 			.transition()
 			.duration(500)
 			.ease(d3.easeCubic)
-			.attr("x", function(d) {
+			.attr("x", function(d, i) {
 				return xScaleBar(+d.Column);
 		   })
 		   .attr("y", function(d) {
@@ -351,6 +348,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 			.duration(500)
 			.ease(d3.easeCubic)
 		   .attr("x", function(d, i) {
+                //console.log(d.Column, i);
 				return xScaleBar(+d.Column);
 		   })
 		   .attr("y", function(d, i) {
@@ -358,6 +356,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 		   })
 		   .attr("width", xScaleBar.bandwidth())
 		   .attr("height", function(d, i) {
+                //console.log(svg_height - yScaleBar(+d.Column));
 				return svg_height - yScaleBar(+d.Column);
 		   })
 		   .style("fill", "steelblue");
@@ -375,12 +374,14 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 			.remove();
 
         // Changes year on svg canvas.
-        svgBar.selectAll("#year_text")
+        /*svgBar.selectAll("#year_text")
             .data(country_filtered)
                 .text(function(d) {
                     return d.Year + " " + d.Country;
-                });
+                });*/
             
+        console.log("Data of box-two: " + d3.select("#box-two").data())
+
     }
 	
     // handle any data loading errors
@@ -477,7 +478,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
 
 		// Create the x-axis
 		// Bar Chart
-        svgBar.append("g")
+        /*svgBar.append("g")
             .attr("class", "axis")
             .attr("id", "x-axis")
             .attr("transform", "translate(0," + svg_height + ")")
@@ -490,11 +491,24 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                 .attr("x", "440")
                 .attr("y", "40")
                 .attr("dy", ".15em")
-                .text("12 Pillars");
+                .text("12 Pillars");*/
+        
+        			// Call the y axis
+			svgBar.append("g")
+				.attr("class", "axis")
+				.attr("id", "y-axis")
+				.call(yAxis);
+					
+			// All but call the x-axis
+			svgBar.append("g")
+				.attr("class", "axis")
+				.attr("id", "x-axis")
+				.attr("transform", "translate(0," + svg_height + ")");
+        
 
         // Create the y axis
 		// Bar Chart
-        svgBar.append("g")
+        /*svgBar.append("g")
             .attr("class", "axis")
             .attr("id", "y-axis")
             .call(yAxisBar)
@@ -507,20 +521,20 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                 .attr("y", "-25")
                 .attr("dy", ".15em")
                 .attr("transform", "rotate(-90)")
-                .text("Pillar Value");
+                .text("Pillar Value");*/
 
         // SVG canvas background
 		// Bar Chart
-        svgBar.append("rect")
+        /*svgBar.append("rect")
             .attr("x", "0")
             .attr("y", "0")
             .attr("fill", "#000")
             .attr("height", "425px")
-            .attr("width", "925px");
+            .attr("width", "925px");*/
 
         // SVG canvas year
 		// Bar Chart
-        svgBar.append("text")
+        /*svgBar.append("text")
                 .attr("x", "50")
                 .attr("y", "0")
                 .attr("dy", "1em")
@@ -528,7 +542,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
                 .attr("font-family", "sans-serif")
                 .attr("stroke", "#fff")
                 .attr("id", "year_text")
-                .text(display_year);
+                .text(display_year);*/
 		
 		
         // Generate the visualisation
@@ -543,7 +557,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data){
             if(display_year > 2017) display_year = 2007;
 
             // Generate the visualisation
-            generateVis();
+            //generateVis();
 
         }
 
