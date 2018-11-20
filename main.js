@@ -115,14 +115,14 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         "padding-top": ($(".box").height() - 500) / 2
     });
 
-var svgBar;
-var xScaleBar;
-var xAxisBar;
-var yScaleBar;
-var yAxisBar;
+    var svgBar;
+    var xScaleBar;
+    var xAxisBar;
+    var yScaleBar;
+    var yAxisBar;
 
-	function createBarCanvas() {	
-	// SVG canvas settings
+    function createBarCanvas() {
+        // SVG canvas settings
 
 
         //Create SVG element as a group with the margins transform applied to it
@@ -204,10 +204,10 @@ var yAxisBar;
             .attr("stroke", "#fff")
             .attr("id", "year_text")
             .text(display_year);
-	
-}
-	createBarCanvas();
-	
+
+    }
+    //createBarCanvas();
+
     function generateVis() {
 
         // Filter data for year.
@@ -342,13 +342,22 @@ var yAxisBar;
                 d3.select("#country-pop").remove();
             })
             .on("click", function(d) {
-				
-				// Clear canvas
-				svgBar.selectAll("*").remove();
-		//		createBarCanvas();
-			
-			// Generate Bar Chart
-                generateVisBar(d.Country, display_year);
+
+                // Clear canvas
+                createBarCanvas();
+                d3.select("svgBar").remove();
+
+                // Generate Bar Chart
+
+
+                // Runs loop for bars.
+                var loopBar = setInterval(loopBars, 2000);
+
+                // For looping through each year.
+                function loopBars() {
+                    // Generate the visualisation
+                    generateVisBar(d.Country, display_year);
+                }
                 $('html, body').animate({
                     scrollTop: $("#box-two").offset().top
                 }, 800);
@@ -362,27 +371,27 @@ var yAxisBar;
             });
 
     }
-	
+
     // Function to generate Bar Chart
     function generateVisBar(country, year) {
-		
-		console.log(country, year);
 
-        
+        //console.log(country, year);
+
+
         // Country function
         function countryFilter(value) {
             return (value.Country == country);
         }
-		
-		    // Year function.
-		function yearFilter(value) {
-        	return (value.Year == year);
-    	}
+
+        // Year function.
+        function yearFilter(value) {
+            return (value.Year == year);
+        }
 
         // Filter the data as before
         var filtered_dataset = dataset.filter(yearFilter);
         var country_filtered = filtered_dataset.filter(countryFilter);
-		console.log(country_filtered);
+        //console.log(country_filtered);
 
         // Loop through every element in the filtered dataset and add to array dataHold
         // Doing this because otherwise the D3 functions only run once.
@@ -409,19 +418,44 @@ var yAxisBar;
         }));
         // Call the x-axis
         svgBar.select("#x-axis")
-			.call(xAxisBar)
-		.selectAll("text")	
+            .call(xAxisBar)
+            .selectAll("text")
             .style("text-anchor", "end")
             .attr("dx", "-.8em")
             .attr("dy", ".15em")
             .attr("transform", function(d) {
-                return "rotate(-65)" 
-                });
+                return "rotate(-65)"
+            });
 
         /******** PERFORM DATA JOIN ************/
         // Join new data with old elements, if any.
-        var bars = svgBar.selectAll(".bar")
+        var bars = svgBar.selectAll("rect")
             .data(dataHold);
+
+        /******** HANDLE ENTER SELECTION ************/
+        bars.enter()
+            .append("rect")
+            .transition()
+            .duration(500)
+            .ease(d3.easeCubic)
+            .attr("x", function(d, i) {
+                return xScaleBar(+d.Column);
+            })
+            .attr("y", function(d, i) {
+                return yScaleBar(+d.Column);
+            })
+            .attr("width", xScaleBar.bandwidth())
+            .attr("height", function(d, i) {
+                return svg_height - yScaleBar(+d.Column);
+            })
+            // Could maybe use this to show a comparison between two countries?
+            .style("fill", function(d, i) {
+                if (i % 2 == 0) {
+                    return "#74add1";
+                } else {
+                    return "#4575b4";
+                }
+            });
 
         /******** HANDLE UPDATE SELECTION ************/
         // Append the rectangles for the bar chart
@@ -438,49 +472,6 @@ var yAxisBar;
             })
             .attr("width", xScaleBar.bandwidth())
             .attr("height", function(d) {
-                return svg_height - yScaleBar(+d.Column);
-            })
-            // Could maybe use this to show a comparison between two countries?
-            .style("fill", function(d, i) {
-                if (i % 2 == 0) {
-                    return "#74add1";
-                } else {
-                    return "#4575b4";
-                }
-            });
-		
-				bars
-            .append("text")
-            .transition()
-            .duration(500)
-            .ease(d3.easeCubic)
-            .attr("class", "label")
-            .attr("x", (function(d) {
-                return xScaleBar(d.Column) + 5;
-            }))
-
-            .attr("y", function(d) {
-                return yScaleBar(d.Column) - 12;
-            })
-            .attr("dy", ".75em")
-            .text(function(d) {
-                return d.Column.toFixed(3);
-            });
-
-        /******** HANDLE ENTER SELECTION ************/
-        bars.enter()
-            .append("rect")
-            .transition()
-            .duration(500)
-            .ease(d3.easeCubic)
-            .attr("x", function(d, i) {
-                return xScaleBar(+d.Column);
-            })
-            .attr("y", function(d, i) {
-                return yScaleBar(+d.Column);
-            })
-            .attr("width", xScaleBar.bandwidth())
-            .attr("height", function(d, i) {
                 return svg_height - yScaleBar(+d.Column);
             })
             // Could maybe use this to show a comparison between two countries?
@@ -508,8 +499,8 @@ var yAxisBar;
                 return d.Year + " " + d.Country;
             });
 
-		// Controls the text labels at the top of each bar. 
-        var barValues = svgBar.selectAll("text.bar")
+        // Controls the text labels at the top of each bar. 
+        var barValues = svgBar.selectAll("#label")
             .data(dataHold)
             .enter()
             .append("text")
@@ -526,7 +517,30 @@ var yAxisBar;
                 return d.Column.toFixed(3);
             });
 
-		barValues.exit().remove();
+        barValues.transition()
+            .duration(500)
+            .ease(d3.easeCubic)
+            .attr("class", "label")
+            .attr("x", (function(d) {
+                return xScaleBar(d.Column) + 5;
+            }))
+
+            .attr("y", function(d) {
+                return yScaleBar(d.Column) - 12;
+            })
+            .attr("dy", ".75em")
+            .text(function(d) {
+                return d.Column.toFixed(3);
+            });
+
+        // This is not working i.e. the bar labels are not getting removed
+        barValues.exit()
+            .style("fill", "Red")
+            .transition()
+            .duration(500)
+            .attr("x", 0)
+            .attr("y", 0)
+            .remove();
 
     }
 
