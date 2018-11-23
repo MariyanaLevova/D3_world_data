@@ -84,6 +84,9 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
 
     // Year.
     var display_year = 2007;
+	
+	// Holding loop data.
+	var loopBars;
 
     // Year function.
     function yearFilter(value) {
@@ -128,6 +131,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         //Create SVG element as a group with the margins transform applied to it
         svgBar = d3.select("#box-two")
             .append("svg")
+			.attr("id", "svgTwo")
             .attr("width", svg_width + margin.left + margin.right)
             .attr("height", svg_height + margin.top + margin.bottom + 200)
             .append("g")
@@ -343,21 +347,28 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             })
             .on("click", function(d) {
 
-                // Clear canvas
-                createBarCanvas();
-                d3.select("svgBar").remove();
-
-                // Generate Bar Chart
-
-
-                // Runs loop for bars.
-                var loopBar = setInterval(loopBars, 2000);
+                var element =  document.getElementById('svgTwo');
+                if (element == null || element == undefined) {
+                    // Create SVG canvas.
+                    createBarCanvas();
+                    // Runs loop for bars.
+                    loopBars = setInterval(loopBarChart, 2000);
+                } else {
+                    // Remove canvas elements.
+                   // svgBar.selectAll(".bars").remove(); does not work
+                    //clearInterval(loopBars);
+					clearInterval(loopBars);
+                    // Runs loop for bars.
+                    loopBars = setInterval(loopBarChart, 2000);
+                }
 
                 // For looping through each year.
-                function loopBars() {
+                function loopBarChart() {
                     // Generate the visualisation
+                    console.log(d.Country);
                     generateVisBar(d.Country, display_year);
                 }
+            
                 $('html, body').animate({
                     scrollTop: $("#box-two").offset().top
                 }, 800);
@@ -398,7 +409,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         // The arrayHold will hold 12 objects each composed of one of the columns from the CSV
         // The D3 functions will use arrayHold              // They will now iterate 12 times - one iteration for each column.
 
-        dataHold = []
+        dataHold = [];
         for (i = 0; i < columnNames.length; i++) {
             var temp = columnNames[i];
             // Create object
@@ -435,6 +446,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         /******** HANDLE ENTER SELECTION ************/
         bars.enter()
             .append("rect")
+			.attr("class", "bars")
             .transition()
             .duration(500)
             .ease(d3.easeCubic)
@@ -500,7 +512,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             });
 
         // Controls the text labels at the top of each bar. 
-        var barValues = svgBar.selectAll("#label")
+  /**      var barValues = svgBar.selectAll("#label")
             .data(dataHold)
             .enter()
             .append("text")
@@ -541,7 +553,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .attr("x", 0)
             .attr("y", 0)
             .remove();
-
+*/
     }
 
     // handle any data loading errors
