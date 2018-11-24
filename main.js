@@ -97,7 +97,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
     var formatYear = d3.timeParse("%Y");
 
     // Setting height of DIV containers.
-    $(".box").css({
+    $("#box-a").css({
         "height": $(window).height()
     });
     $("#box-right").css({
@@ -111,12 +111,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
     $("#box-one").css({
         "padding-top": ($(".box").height() - 500) / 2
     });
-    $("#box-two").css({
-        "padding-left": ($(".box").width() - 1000) / 2
-    });
-    $("#box-two").css({
-        "padding-top": ($(".box").height() - 500) / 2
-    });
 
     var svgBar;
     var xScaleBar;
@@ -125,15 +119,24 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
     var yAxisBar;
 
     function createBarCanvas() {
-        // SVG canvas settings
-
+            
+        // Setting height of DIV containers.
+        $("#box-b").css({
+            "height": $(window).height()
+        });
+        $("#box-two").css({
+        "padding-left": ($(".box").width() - 1000) / 2
+        });
+        $("#box-two").css({
+            "padding-top": ($(".box").height() - 500) / 4
+        });
 
         //Create SVG element as a group with the margins transform applied to it
         svgBar = d3.select("#box-two")
             .append("svg")
 			.attr("id", "svgTwo")
             .attr("width", svg_width + margin.left + margin.right)
-            .attr("height", svg_height + margin.top + margin.bottom + 200)
+            .attr("height", svg_height + margin.top + margin.bottom + 100)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -434,6 +437,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .style("text-anchor", "end")
             .attr("dx", "-.8em")
             .attr("dy", ".15em")
+            .style("font", "bold 10px sans-serif")
             .attr("transform", function(d) {
                 return "rotate(-65)"
             });
