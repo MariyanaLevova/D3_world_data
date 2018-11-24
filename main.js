@@ -7,6 +7,7 @@ function randomInt() {
 }
 
 var selected_country;
+var country;
 
 d3.csv("GCI_CompleteData2.csv", function(error, data) {
 
@@ -77,9 +78,41 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         'Business Sophistication',
         'Innovation'
     ];
+	
+	    // Store column names in array so can reference below
+    var columnNames2 = [
+        '',
+		'Institutions',
+        '',
+        'Infrastructure',
+	    '',
+        'Macroeconomic Environment',
+		'',
+        'Health and Primary Education',
+		'',
+        'Higher Education and Training',
+		'',
+        'Goods Market Efficiency',
+		'',
+        'Labor Market Efficiency',
+		'',
+        'Financial Market Development',
+		'',
+        'Technological Readiness',
+		'',
+        'Market Size',
+		'',
+        'Business Sophistication',
+		'',
+        'Innovation'
+    ];
 
     var xAxisBarChart = function(d, i) {
         return columnNames[i] + " ";
+    }
+	
+    var xAxisBarChartComparison = function(d, i) {
+        return columnNames2[i] + " ";
     }
 
     // Year.
@@ -150,6 +183,11 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         xAxisBar = d3.axisBottom()
             .scale(xScaleBar)
             .tickFormat(xAxisBarChart);
+		
+		        // Create an x-axis connected to the x scale
+        xAxisBarComparison = d3.axisBottom()
+            .scale(xScaleBar)
+            .tickFormat(xAxisBarChartComparison);
 
         //Set up the scale to be used on the y axis
         yScaleBar = d3.scaleLinear()
@@ -368,7 +406,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
                 // For looping through each year.
                 function loopBarChart() {
                     // Generate the visualisation
-                    console.log(d.Country);
+					country = d.Country;
                     generateVisBar(d.Country, display_year);
                 }
             
@@ -389,7 +427,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
     // Function to generate Bar Chart
     function generateVisBar(country, year) {
 
-        //console.log(country, year);
 
 
         // Country function
@@ -424,7 +461,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             // Append object to dataHold to create new row in array
             dataHold.push(tempObj);
         }
-        console.log(dataHold);
 
         // Update the domain of the x scale
         xScaleBar.domain(dataHold.map(function(d, i) {
@@ -559,6 +595,148 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .remove();
 */
     }
+	
+	
+function countryComparison(dataset, display_year, country1, country2) {
+	console.log(display_year, country1, country2);
+	
+						clearInterval(loopBars);
+
+	
+	// Filter data per country per year
+        // Year function.
+        function yearFilter(value) {
+            return (value.Year == display_year);
+        }
+	
+	        // Country1 function
+        function countryFilter1(value) {
+            return (value.Country == country1);
+        }
+	
+	        // Country2 function
+        function countryFilter2(value) {
+            return (value.Country == country2);
+        }
+
+        // Filter the data as before
+        var filtered_dataset = dataset.filter(yearFilter);
+        var country_filtered1 = filtered_dataset.filter(countryFilter1);
+        var country_filtered2 = filtered_dataset.filter(countryFilter2);
+	
+		console.log(country_filtered1[0]);
+		console.log(country_filtered2[0]);
+	//	console.log(country_filtered2[0]["1st_pillar_Institutions"]);
+		var combinedData = [];
+        for (i = 0; i < columnNames.length; i++) {
+            var temp = columnNames[i];
+            // Create object
+            var tempObj1 = {};
+            var tempObj2 = {};
+            // Add column to object with key = 'Column' and value = Innovation etc.
+            // The key value ('Column') is the same for all CSV columns
+            // It means in the D3 functions below I can just say d3.Column to call it.
+            tempObj1["Column"] = country_filtered1[0][temp];
+            tempObj2["Column"] = country_filtered2[0][temp];
+            // Append object to dataHold to create new row in array
+            combinedData.push(tempObj1);
+            combinedData.push(tempObj2);
+        }
+	console.log(combinedData);
+	
+	        // Update the domain of the x scale
+        xScaleBar.domain(combinedData.map(function(d, i) {
+            return d.Column;
+        }));
+        // Call the x-axis
+        svgBar.select("#x-axis")
+            .call(xAxisBarComparison)
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {
+                return "rotate(-65)"
+            });
+	
+	        /******** PERFORM DATA JOIN ************/
+        // Join new data with old elements, if any.
+        var bars = svgBar.selectAll("rect")
+            .data(combinedData);
+
+        /******** HANDLE ENTER SELECTION ************/
+        bars.enter()
+            .append("rect")
+			.attr("class", "bars")
+            .transition()
+            .duration(500)
+            .ease(d3.easeCubic)
+            .attr("x", function(d, i) {
+                return xScaleBar(+d.Column);
+            })
+            .attr("y", function(d, i) {
+                return yScaleBar(+d.Column);
+            })
+            .attr("width", xScaleBar.bandwidth())
+            .attr("height", function(d, i) {
+                return svg_height - yScaleBar(+d.Column);
+            })
+            // Could maybe use this to show a comparison between two countries?
+            .style("fill", function(d, i) {
+                if (i % 2 == 0) {
+                    return "#74add1";
+                } else {
+                    return "#4575b4";
+                }
+            });
+
+        /******** HANDLE UPDATE SELECTION ************/
+        // Append the rectangles for the bar chart
+
+        bars
+            .transition()
+            .duration(500)
+            .ease(d3.easeCubic)
+            .attr("x", function(d, i) {
+                return xScaleBar(+d.Column);
+            })
+            .attr("y", function(d) {
+                return yScaleBar(+d.Column);
+            })
+            .attr("width", xScaleBar.bandwidth())
+            .attr("height", function(d) {
+                return svg_height - yScaleBar(+d.Column);
+            })
+            // Could maybe use this to show a comparison between two countries?
+            .style("fill", function(d, i) {
+                if (i % 2 == 0) {
+                    return "#74add1";
+                } else {
+                    return "#4575b4";
+                }
+            });
+
+        /******** HANDLE EXIT SELECTION ************/
+        // Remove bars that no longer have a matching data element
+        bars.exit()
+            .style("fill", "Red")
+            .transition()
+            .duration(500)
+            .attr("r", 0)
+            .remove();
+
+        // Changes year on svg canvas.
+        svgBar.selectAll("#year_text")
+            .data(country_filtered1)
+			.attr("font-size", "20px")
+			.attr("fill", "000")
+            .text(function(d) {
+                return d.Year + " " + country1 + " " + country2;
+            });
+
+	
+	
+}
 
     // handle any data loading errors
     if (error) {
@@ -704,6 +882,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             generateVis();
         });
 
+		var selectedCountry;
         // Dropdown menu for selecting countries.
         // Has search functionality.
         $("#countrySelect").select2({
@@ -712,6 +891,12 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             containerCssClass: 'selectDrop',
             dropdownCssClass: 'selectDropMenu'
         });
+
+		$("#countrySelect").on("change", function() {
+			selectedCountry = $("#countrySelect option:selected").text();
+						// fire up the comparison bar chart
+			countryComparison(dataset, display_year, country, selectedCountry);
+		});
 
         // Set for storing unique occurrences of countries in dataset.
         var countryList = new Set();
