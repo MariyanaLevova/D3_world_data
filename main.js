@@ -38,24 +38,24 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
     yScale = d3.scaleLinear()
         .range([svg_height, 0]);
 
-    // Circle radius according to population
+    // Circle radius according to population.
     radiusScale = d3.scaleSqrt()
         .range([0, 50]);
 
-    // Create an x-axis connected to the x scale
+    // Create an x-axis connected to the x scale.
     var xAxis = d3.axisBottom()
         .scale(xScale)
         .ticks(4)
         .tickFormat(d3.format(",.2f"));
 
-    //Define Y axis
+    // Define Y axis.
     var yAxis = d3.axisLeft()
         .scale(yScale)
         .ticks(5);
 
 
-    //Create SVG element as a group with the margins transform applied to it
-    //Bubble Plot
+    // Create SVG element as a group with the margins transform applied to it.
+    // Bubble Plot.
     var svg = d3.select("#box-one")
         .append("svg")
         .attr("width", svg_width + margin.left + margin.right)
@@ -63,7 +63,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // Store column names in array so can reference below
+    // Store column names in array so can reference below for multi-variate data.
     var columnNames = [
         'Institutions',
         'Infrastructure',
@@ -79,7 +79,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         'Innovation'
     ];
 	
-	    // Store column names in array so can reference below
+    // Store column names in array so can reference in bar chart comparison.
     var columnNames2 = [
         '',
 		'Institutions',
@@ -120,8 +120,11 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
 	
 	// Holding loop data.
 	var loopBars;
+    
+    // Identifies whether trail feature is selected or not.
+    var trail = false;
 
-    // Year function.
+    // Primary year function for filtering all data except data for tracing path of country across canvas.
     function yearFilter(value) {
         return (value.Year == display_year);
     }
@@ -145,6 +148,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         "padding-top": ($(".box").height() - 500) / 2
     });
 
+    // Global SVG variables.
     var svgBar;
     var xScaleBar;
     var xAxisBar;
@@ -247,11 +251,10 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .attr("font-size", "100px")
             .attr("font-family", "sans-serif")
             .attr("stroke", "#fff")
-            .attr("id", "year_text")
+            .attr("id", "year_text_two")
             .text(display_year);
 
     }
-    //createBarCanvas();
 
     function generateVis() {
 
@@ -392,15 +395,24 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
                 if (element == null || element == undefined) {
                     // Create SVG canvas.
                     createBarCanvas();
-                    // Runs loop for bars.
-                    loopBars = setInterval(loopBarChart, 2000);
+                    if (playLoop === true) {
+                        // Runs loop for bars.
+                        loopBars = setInterval(loopBarChart, 2000);  
+                    } else {
+                        // Bar chart, but not in loop as play button stopped.
+                        loopBarChart();
+                    }
+                    
                 } else {
                     // Remove canvas elements.
-                   // svgBar.selectAll(".bars").remove(); does not work
-                    //clearInterval(loopBars);
-					clearInterval(loopBars);
-                    // Runs loop for bars.
-                    loopBars = setInterval(loopBarChart, 2000);
+                    clearInterval(loopBars);
+                    if (playLoop === true) {
+                        // Runs loop for bars.
+                        loopBars = setInterval(loopBarChart, 2000);
+                    } else {
+                        // Bar chart, but not in loop as play button stopped.
+                        loopBarChart();
+                    }
                 }
 
                 // For looping through each year.
@@ -417,6 +429,8 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
 
         // Changes year on svg canvas.
         svg.selectAll("#year_text")
+            .attr("x", "350")
+            .attr("y", "250")
             .data(data_filtered)
             .text(function(d) {
                 return d.Year;
@@ -424,10 +438,147 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
 
     }
 
+    function generateVisTrail(points) {
+
+        /******** HANDLE ENTER SELECTION ************/
+        points
+            .enter()
+            .append("circle")
+            .transition()
+            .duration(500)
+            .ease(d3.easeCubic)
+            .attr("cx", function(d) {
+                if (d.GDP !== 0) {
+                    return xScale(+d.GDP);
+                }
+            })
+            .attr("cy", function(d) {
+                if (d.Global_Competitiveness_Index !== 0) {
+                    return yScale(+d.Global_Competitiveness_Index);
+                }
+            })
+            .attr("r", function(d, i) {
+                if (d.Population !== 0) {
+                    return radiusScale(+d.Population);
+                }
+            })
+            .attr("class", function(d) {
+                return d.Country;
+            })
+            .style("fill", function(d) {
+                return colorBrewer[1];
+            })
+            .style("stroke", function(d) {
+                return "#fff";
+            })
+            .style("stroke-width", function(d) {
+                return "4";
+            })
+            .style("opacity", "0.8")
+            .style("cursor", "pointer");
+        
+        d3.select('#box-one').select('svg').selectAll('circle')
+            .on("mouseover", function(d) {
+                // Add country name.
+                var coordinates = d3.mouse(this);
+                // Population formatting
+                var f = d3.format(",");
+                // Remove country box.
+                svg.append("rect")
+                    .attr("x", coordinates[0] - 60)
+                    .attr("y", coordinates[1] + 30)
+                    .attr("fill", "#fff")
+                    .attr("height", "30px")
+                    .attr("width", "80px")
+                    .attr("id", "country-box");
+                // Add country name.
+                svg.append("text")
+                    .attr("x", coordinates[0] - 60)
+                    .attr("y", coordinates[1] + 10)
+                    .attr("dy", "1em")
+                    .attr("font-size", "15px")
+                    .attr("id", "country-name")
+                    .attr("font-family", "sans-serif")
+                    .attr("stroke", "#fff")
+                    .attr("fill", "#fff")
+                    .text(d.Country);
+                // Add population title.
+                svg.append("text")
+                    .attr("x", coordinates[0] - 60)
+                    .attr("y", coordinates[1] + 30)
+                    .attr("dy", "1em")
+                    .attr("font-size", "11px")
+                    .attr("id", "country-pop-title")
+                    .attr("font-family", "sans-serif")
+                    .attr("stroke", "#000")
+                    .attr("fill", "#000")
+                    .text("Population");
+                // Add population.
+                svg.append("text")
+                    .attr("x", coordinates[0] - 60)
+                    .attr("y", coordinates[1] + 45)
+                    .attr("dy", "1em")
+                    .attr("font-size", "11px")
+                    .attr("id", "country-pop")
+                    .attr("font-family", "sans-serif")
+                    .attr("stroke", "#000")
+                    .attr("fill", "#000")
+                    .text(f(d.Population));
+            })
+            .on("mouseout", function(d) {
+                // Remove country box.
+                d3.select("#country-box").remove();
+                // Remove country name.
+                d3.select("#country-name").remove();
+                // Remove country population title.
+                d3.select("#country-pop-title").remove();
+                // Remove country population.
+                d3.select("#country-pop").remove();
+            })
+            .on("click", function(d) {
+
+                var element =  document.getElementById('svgTwo');
+                if (element == null || element == undefined) {
+                    // Create SVG canvas.
+                    createBarCanvas();
+                    if (playLoop === true) {
+                        // Runs loop for bars.
+                        loopBars = setInterval(loopBarChart, 2000);  
+                    } else {
+                        // Bar chart, but not in loop as play button stopped.
+                        loopBarChart();
+                    }
+                    
+                } else {
+                    // Remove canvas elements.
+                    clearInterval(loopBars);
+                    if (playLoop === true) {
+                        // Runs loop for bars.
+                        loopBars = setInterval(loopBarChart, 2000);
+                    } else {
+                        // Bar chart, but not in loop as play button stopped.
+                        loopBarChart();
+                    }
+                }
+
+                // For looping through each year.
+                function loopBarChart() {
+                    // Generate the visualisation
+					country = d.Country;
+                    generateVisBar(d.Country, display_year);
+                }
+            
+                $('html, body').animate({
+                    scrollTop: $("#box-two").offset().top
+                }, 800);
+            });
+        
+    }
+    
     // Function to generate Bar Chart
     function generateVisBar(country, year) {
-
-
+        
+        console.log("Bar");
 
         // Country function
         function countryFilter(value) {
@@ -537,15 +688,10 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
 
         /******** HANDLE EXIT SELECTION ************/
         // Remove bars that no longer have a matching data element
-        bars.exit()
-            .style("fill", "Red")
-            .transition()
-            .duration(500)
-            .attr("r", 0)
-            .remove();
+        bars.exit().remove();
 
         // Changes year on svg canvas.
-        svgBar.selectAll("#year_text")
+        svgBar.selectAll("#year_text_two")
             .data(country_filtered)
             .text(function(d) {
                 return d.Year + " " + d.Country;
@@ -560,7 +706,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .attr("x", (function(d) {
                 return xScaleBar(d.Column) + 5;
             }))
-
             .attr("y", function(d) {
                 return yScaleBar(d.Column) - 12;
             })
@@ -568,7 +713,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .text(function(d) {
                 return d.Column.toFixed(3);
             });
-
         barValues.transition()
             .duration(500)
             .ease(d3.easeCubic)
@@ -576,7 +720,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .attr("x", (function(d) {
                 return xScaleBar(d.Column) + 5;
             }))
-
             .attr("y", function(d) {
                 return yScaleBar(d.Column) - 12;
             })
@@ -584,7 +727,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .text(function(d) {
                 return d.Column.toFixed(3);
             });
-
         // This is not working i.e. the bar labels are not getting removed
         barValues.exit()
             .style("fill", "Red")
@@ -598,12 +740,8 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
 	
 	
 function countryComparison(dataset, display_year, country1, country2) {
-	console.log(display_year, country1, country2);
 	
-						clearInterval(loopBars);
-
-	
-	// Filter data per country per year
+        // Filter data per country per year
         // Year function.
         function yearFilter(value) {
             return (value.Year == display_year);
@@ -624,9 +762,6 @@ function countryComparison(dataset, display_year, country1, country2) {
         var country_filtered1 = filtered_dataset.filter(countryFilter1);
         var country_filtered2 = filtered_dataset.filter(countryFilter2);
 	
-		console.log(country_filtered1[0]);
-		console.log(country_filtered2[0]);
-	//	console.log(country_filtered2[0]["1st_pillar_Institutions"]);
 		var combinedData = [];
         for (i = 0; i < columnNames.length; i++) {
             var temp = columnNames[i];
@@ -642,12 +777,12 @@ function countryComparison(dataset, display_year, country1, country2) {
             combinedData.push(tempObj1);
             combinedData.push(tempObj2);
         }
-	console.log(combinedData);
 	
-	        // Update the domain of the x scale
+	   // Update the domain of the x scale
         xScaleBar.domain(combinedData.map(function(d, i) {
             return d.Column;
         }));
+    
         // Call the x-axis
         svgBar.select("#x-axis")
             .call(xAxisBarComparison)
@@ -655,11 +790,12 @@ function countryComparison(dataset, display_year, country1, country2) {
             .style("text-anchor", "end")
             .attr("dx", "-.8em")
             .attr("dy", ".15em")
+            .style("font", "bold 10px sans-serif")
             .attr("transform", function(d) {
                 return "rotate(-65)"
             });
 	
-	        /******** PERFORM DATA JOIN ************/
+	    /******** PERFORM DATA JOIN ************/
         // Join new data with old elements, if any.
         var bars = svgBar.selectAll("rect")
             .data(combinedData);
@@ -692,7 +828,6 @@ function countryComparison(dataset, display_year, country1, country2) {
 
         /******** HANDLE UPDATE SELECTION ************/
         // Append the rectangles for the bar chart
-
         bars
             .transition()
             .duration(500)
@@ -718,30 +853,25 @@ function countryComparison(dataset, display_year, country1, country2) {
 
         /******** HANDLE EXIT SELECTION ************/
         // Remove bars that no longer have a matching data element
-        bars.exit()
-            .style("fill", "Red")
-            .transition()
-            .duration(500)
-            .attr("r", 0)
-            .remove();
+        bars.exit().remove();
 
         // Changes year on svg canvas.
-        svgBar.selectAll("#year_text")
+        svgBar.selectAll("#year_text_two")
             .data(country_filtered1)
 			.attr("font-size", "20px")
 			.attr("fill", "000")
             .text(function(d) {
                 return d.Year + " " + country1 + " " + country2;
             });
+    
+    }
 
-	
-	
-}
-
-    // handle any data loading errors
+    // Error
     if (error) {
-        console.log("Something went wrong");
+        
+        console.log("Error occurred.");
         console.log(error);
+        
     } else {
 
         // Convert each variable to numeric type and parse the date
@@ -835,21 +965,78 @@ function countryComparison(dataset, display_year, country1, country2) {
             .attr("stroke", "#fff")
             .attr("id", "year_text")
             .text(display_year);
+        
+        var holdSet = [];
+        
+        function trailer(countryInput) {
+        
+            //var countryName = countryInput;
+            var yearInternal = 2007;
 
+            // Year function.
+            function yearFilter2(value) {
+                return (value.Year == yearInternal);
+            }
 
+            // Country function
+            function countryFilter2(value) {
+                return (value.Country == countryInput);
+            }
+
+            for(i = 0; i <= 12; i++) {
+                var countryFilterData = dataset.filter(countryFilter2)
+                var newData = svg.selectAll("circle").data(countryFilterData.filter(yearFilter2)); 
+                holdSet.push(newData);
+                yearInternal += 1;   
+            }
+    
+        }
+    
         // Generate the visualisation
         generateVis();
-
+        
         // Runs loop for year.
         var currentYear = setInterval(stopStart, 2000);
-
+        // Index for accessing trail nodes in holdSet array.
+        var arrayIndex;
+        
         // For looping through each year.
         function stopStart() {
+            
+            // Update year.
             display_year = display_year + 1;
-            if (display_year > 2017) display_year = 2007;
-
+            // Reset year.
+            if (display_year > 2017) { 
+                
+                // Remove all nodes from canvas.
+                d3.select('svg').selectAll('circle').remove();
+                
+                // Update display year.
+                display_year = 2007;
+                
+                if (trail != false) {
+                    // Calculate index.
+                    arrayIndex = display_year - 2007;
+                
+                    // Generate trail visualisation.
+                    generateVisTrail(holdSet[arrayIndex]);   
+                }
+                
+            } else {
+                
+                if (trail != false) {
+                    // Calculate index.
+                    arrayIndex = display_year - 2007;
+                   
+                    // Generate trail visualisation.
+                    generateVisTrail(holdSet[arrayIndex]);
+                }
+                
+            }
+            
             // Generate the visualisation
             generateVis();
+               
         }
 
         // Loop boolean check
@@ -859,6 +1046,7 @@ function countryComparison(dataset, display_year, country1, country2) {
         $("#stopStartButton").click(function() {
             if (playLoop === true) {
                 clearInterval(currentYear);
+                //clearInterval(loopBars);
                 $(this).text("Start");
                 playLoop = false;
             } else {
@@ -877,25 +1065,88 @@ function countryComparison(dataset, display_year, country1, country2) {
                 $("#stopStartButton").text("Start");
             }
 
-            display_year = $(this).text();
+            // Remove existing elements, particularly trailing elements.
+            d3.select('svg').selectAll('circle').remove();
+            // Get year from canvas.
+            display_year = parseInt($(this).text());
             // Generate the visualisation
             generateVis();
         });
 
+        // Variable for holding country names.
 		var selectedCountry;
-        // Dropdown menu for selecting countries.
-        // Has search functionality.
+        
+        // Select2 dropdown for selecting countries to compare against.
+        // Has search functionality provided by select2.
         $("#countrySelect").select2({
             theme: 'bootstrap',
             width: '100%',
             containerCssClass: 'selectDrop',
-            dropdownCssClass: 'selectDropMenu'
+            dropdownCssClass: 'selectDropMenu',
+            placeholder: 'Compare Country'
+        });
+        
+        // Hide Select2 country comparison by default as bar chart not in view on page load.
+        $("#countrySelect").next(".select2-container").hide();
+        
+        // Select2 dropdown for selecting country to trace path on canvas.
+        // Has search functionality provided by select2.
+        $("#trailSelect").select2({
+            theme: 'bootstrap',
+            width: '100%',
+            containerCssClass: 'selectDrop',
+            dropdownCssClass: 'selectDropMenu',
+            placeholder: 'Trace Path'
         });
 
+        // On select2 change for country comparison.
 		$("#countrySelect").on("change", function() {
+            // Get country name.
 			selectedCountry = $("#countrySelect option:selected").text();
-						// fire up the comparison bar chart
+            // Comparison bar chart
 			countryComparison(dataset, display_year, country, selectedCountry);
+		});
+        
+        // Check if trail is checked or not.
+        var trailChecked = false;
+        
+        // On select2 change for country trace.
+		$("#trailSelect").on("change", function() {
+            // Remove all existing nodes.
+            d3.select("svg").selectAll("circle").remove();
+            
+            // Update canvas text.
+            d3.select('svg').selectAll("#year_text")
+                .attr("x", "300")
+                .attr("y", "250")
+                .text(function(d) {
+                    return "Loading";
+                });
+            
+            // Country name.
+            countryNameTrail = $("#trailSelect option:selected").text();
+            
+            // Empty previous country data, if any.
+            holdSet = [];
+            
+            // Create data for country to trace.
+            trailer(countryNameTrail);
+            trail = true;
+            clearInterval(currentYear);
+            currentYear = setInterval(stopStart, 2000);
+            $("#toggle-box").show();
+            trailChecked = true;
+            
+            // Update start/stop button
+            if (playLoop === false) {
+                $("#stopStartButton").text("Stop");
+                playLoop = true;
+            }
+            
+            // Update toggle switch back to on position.
+            if ($('#toggle-input').prop('checked')) {
+                $("#toggle-input").prop('checked', false);
+            }
 		});
 
         // Set for storing unique occurrences of countries in dataset.
@@ -906,10 +1157,46 @@ function countryComparison(dataset, display_year, country1, country2) {
             countryList.add(dataset[i]['Country']);
         }
 
-        // Populate dropdown from country names in set.
+        // Populate country comparison dropdown and country trail dropdown from country names in set.
         for (let item of countryList) {
             $("#countrySelect").append("<option value=" + item + ">" + item + "</option>");
+            $("#trailSelect").append("<option value=" + item + ">" + item + "</option>");
         };
+        
+        // Hide/Show buttons in right box panel according to scroll position.
+        $(window).scroll(function() {
+
+            if ($(this).scrollTop() > 400) {
+                $("#countrySelect").show();
+                $('#countrySelect').next(".select2-container").show();
+                $("#trailSelect").hide();
+                $('#trailSelect').next(".select2-container").hide();
+                $("#trailSelect").select2("close");
+                $("#toggle-box").hide();
+            } else {
+                $("#countrySelect").hide();
+                $('#countrySelect').next(".select2-container").hide();
+                $("#countrySelect").select2("close");
+                $("#trailSelect").show();
+                $('#trailSelect').next(".select2-container").show();
+                if (trailChecked == true) {
+                    $("#toggle-box").show();   
+                }
+            }
+            
+        });
+        
+        // On switch change.
+		$("#toggle-input").on("change", function() {
+            if ( trail == true) {
+                trail = false;    
+            } else {
+                trail = true;
+            }
+            
+            clearInterval(currentYear);
+            currentYear = setInterval(stopStart, 2000);
+		});
 
     }
 

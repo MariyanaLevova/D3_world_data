@@ -46,8 +46,10 @@
             
             <div id="box-right">
             
+                <!-- Start/Stop button -->
                 <button id="stopStartButton" role="button" class="buttons">Stop</button>
 
+                <!-- Year dropdown -->
                 <div class="dropdown">
                   <button class="dropdown-toggle buttons" type="button" data-toggle="dropdown">Select Year
                   <span class="caret"></span></button>
@@ -66,7 +68,25 @@
                   </ul>
                 </div>
                 
+                <!-- Country trace -->
+                <select id="trailSelect">
+                    <option></option>
+                </select>
+                
+                <!-- Switch -->
+                <div id="toggle-box">
+                    <p id="toggle-text">Trace On/Off</p>
+                    <div id="toggle-switch">
+                        <label class="switch">
+                          <input type="checkbox" id="toggle-input">
+                          <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Country comparison -->
                 <select id="countrySelect">
+                    <option></option>
                 </select>
                 
             </div>
