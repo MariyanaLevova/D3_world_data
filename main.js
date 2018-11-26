@@ -458,7 +458,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         /******** HANDLE ENTER SELECTION ************/
         points
             .enter()
-            .append("circle")
+            .append("ellipse")
             .transition()
             .duration(500)
             .ease(d3.easeCubic)
@@ -472,7 +472,12 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
                     return yScale(+d.Global_Competitiveness_Index);
                 }
             })
-            .attr("r", function(d, i) {
+            .attr("rx", function(d, i) {
+                if (d.Population !== 0) {
+                    return radiusScale(+d.Population);
+                }
+            })
+		            .attr("ry", function(d, i) {
                 if (d.Population !== 0) {
                     return radiusScale(+d.Population);
                 }
@@ -492,7 +497,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .style("opacity", "0.8")
             .style("cursor", "pointer");
         
-        d3.select('#box-one').select('svg').selectAll('circle')
+        d3.select('#box-one').select('svg').selectAll('ellipse')
             .on("mouseover", function(d) {
                 // Add country name.
                 var coordinates = d3.mouse(this);
@@ -1025,7 +1030,7 @@ function countryComparison(dataset, display_year, country1, country2) {
             if (display_year > 2017) { 
                 
                 // Remove all nodes from canvas.
-                d3.select('svg').selectAll('circle').remove();
+                d3.select('svg').selectAll('ellipse').remove();
                 
                 // Update display year.
                 display_year = 2007;
