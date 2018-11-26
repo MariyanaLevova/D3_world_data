@@ -119,7 +119,10 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
     var display_year = 2007;
 	
 	// Holding loop data.
-	var loopBars;
+	var loopBars = null;
+    
+    // Country name for bar chart.
+    var countryNameBarChart;
     
     // Identifies whether trail feature is selected or not.
     var trail = false;
@@ -186,12 +189,14 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         // Create an x-axis connected to the x scale
         xAxisBar = d3.axisBottom()
             .scale(xScaleBar)
-            .tickFormat(xAxisBarChart);
+            .tickFormat(xAxisBarChart)
+            .tickSize(0);
 		
 		        // Create an x-axis connected to the x scale
         xAxisBarComparison = d3.axisBottom()
             .scale(xScaleBar)
-            .tickFormat(xAxisBarChartComparison);
+            .tickFormat(xAxisBarChartComparison)
+            .tickSize(0);
 
         //Set up the scale to be used on the y axis
         yScaleBar = d3.scaleLinear()
@@ -255,8 +260,14 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .text(display_year);
 
     }
+    
+    // For looping through each year.
+    function loopBarChart(countryNameBarChart) {
+        // Generate the visualisation
+        generateVisBar(countryNameBarChart, display_year);
+    }
 
-    function generateVis() {
+    function generateVis(tracer) {
 
         // Filter data for year.
         var data_filtered = dataset.filter(yearFilter);
@@ -268,17 +279,17 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .duration(500)
             .ease(d3.easeCubic)
             .attr("cx", function(d) {
-                if (d.GDP !== 0) {
+                if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return xScale(+d.GDP);
                 }
             })
             .attr("cy", function(d) {
-                if (d.Global_Competitiveness_Index !== 0) {
+                if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return yScale(+d.Global_Competitiveness_Index);
                 }
             })
             .attr("r", function(d, i) {
-                if (d.Population !== 0) {
+                if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return radiusScale(+d.Population);
                 }
             })
@@ -288,7 +299,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .style("fill", function(d, i) {
                 return colorBrewer[randomInt()];
             })
-            .style("opacity", "0.8");
+            .style("opacity", function(d) { if(tracer === true) { return "0.3" } return "0.8" });
 
         /******** HANDLE ENTER SELECTION ************/
         svg.selectAll("circle")
@@ -299,17 +310,17 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .duration(500)
             .ease(d3.easeCubic)
             .attr("cx", function(d) {
-                if (d.GDP !== 0) {
+                if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return xScale(+d.GDP);
                 }
             })
             .attr("cy", function(d) {
-                if (d.Global_Competitiveness_Index !== 0) {
+                if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return yScale(+d.Global_Competitiveness_Index);
                 }
             })
             .attr("r", function(d, i) {
-                if (d.Population !== 0) {
+                if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return radiusScale(+d.Population);
                 }
             })
@@ -319,7 +330,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .style("fill", function(d, i) {
                 return colorBrewer[randomInt()];
             })
-            .style("opacity", "0.8")
+            .style("opacity", function(d) { if(tracer === true) { return "0.3" } return "0.8" })
             .style("cursor", "pointer");
 
         /******** HANDLE EXIT SELECTION ************/
@@ -397,10 +408,12 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
                     createBarCanvas();
                     if (playLoop === true) {
                         // Runs loop for bars.
-                        loopBars = setInterval(loopBarChart, 2000);  
+                        loopBars = setInterval(function(){ generateVisBar(d.Country, display_year); }, 2000);  
+                        countryNameBarChart = d.Country;
                     } else {
                         // Bar chart, but not in loop as play button stopped.
-                        loopBarChart();
+                        loopBars = loopBarChart(d.Country);
+                        countryNameBarChart = d.Country;
                     }
                     
                 } else {
@@ -408,19 +421,21 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
                     clearInterval(loopBars);
                     if (playLoop === true) {
                         // Runs loop for bars.
-                        loopBars = setInterval(loopBarChart, 2000);
+                        loopBars = setInterval(function(){ generateVisBar(d.Country, display_year); }, 2000);
+                        countryNameBarChart = d.Country;
                     } else {
                         // Bar chart, but not in loop as play button stopped.
-                        loopBarChart();
+                        loopBars = loopBarChart(d.Country);
+                        countryNameBarChart = d.Country;
                     }
                 }
 
                 // For looping through each year.
-                function loopBarChart() {
+                /*function loopBarChart() {
                     // Generate the visualisation
 					country = d.Country;
                     generateVisBar(d.Country, display_year);
-                }
+                }*/
             
                 $('html, body').animate({
                     scrollTop: $("#box-two").offset().top
@@ -543,10 +558,10 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
                     createBarCanvas();
                     if (playLoop === true) {
                         // Runs loop for bars.
-                        loopBars = setInterval(loopBarChart, 2000);  
+                        loopBars = setInterval(loopBarChart(d.Country), 2000);  
                     } else {
                         // Bar chart, but not in loop as play button stopped.
-                        loopBarChart();
+                        loopBarChart(d.Country);
                     }
                     
                 } else {
@@ -554,18 +569,11 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
                     clearInterval(loopBars);
                     if (playLoop === true) {
                         // Runs loop for bars.
-                        loopBars = setInterval(loopBarChart, 2000);
+                        loopBars = setInterval(loopBarChart(d.Country), 2000);
                     } else {
                         // Bar chart, but not in loop as play button stopped.
-                        loopBarChart();
+                        loopBarChart(d.Country);
                     }
-                }
-
-                // For looping through each year.
-                function loopBarChart() {
-                    // Generate the visualisation
-					country = d.Country;
-                    generateVisBar(d.Country, display_year);
                 }
             
                 $('html, body').animate({
@@ -577,8 +585,6 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
     
     // Function to generate Bar Chart
     function generateVisBar(country, year) {
-        
-        console.log("Bar");
 
         // Country function
         function countryFilter(value) {
@@ -651,14 +657,15 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .attr("height", function(d, i) {
                 return svg_height - yScaleBar(+d.Column);
             })
-            // Could maybe use this to show a comparison between two countries?
+            // Colours used to show multi-variate data.
             .style("fill", function(d, i) {
                 if (i % 2 == 0) {
                     return "#74add1";
                 } else {
                     return "#4575b4";
                 }
-            });
+            })
+            .style("opacity", "0.8");
 
         /******** HANDLE UPDATE SELECTION ************/
         // Append the rectangles for the bar chart
@@ -677,14 +684,15 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
             .attr("height", function(d) {
                 return svg_height - yScaleBar(+d.Column);
             })
-            // Could maybe use this to show a comparison between two countries?
+            // Colours used to show multi-variate data.
             .style("fill", function(d, i) {
                 if (i % 2 == 0) {
                     return "#74add1";
                 } else {
                     return "#4575b4";
                 }
-            });
+            })
+            .style("opacity", "0.8");
 
         /******** HANDLE EXIT SELECTION ************/
         // Remove bars that no longer have a matching data element
@@ -693,8 +701,10 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
         // Changes year on svg canvas.
         svgBar.selectAll("#year_text_two")
             .data(country_filtered)
+            .attr("x", "350")
+            .attr("y", "250")
             .text(function(d) {
-                return d.Year + " " + d.Country;
+                return d.Year;
             });
 
         // Controls the text labels at the top of each bar. 
@@ -740,6 +750,8 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
 	
 	
 function countryComparison(dataset, display_year, country1, country2) {
+    
+        console.log(country2);
 	
         // Filter data per country per year
         // Year function.
@@ -791,6 +803,9 @@ function countryComparison(dataset, display_year, country1, country2) {
             .attr("dx", "-.8em")
             .attr("dy", ".15em")
             .style("font", "bold 10px sans-serif")
+            .attr("transform", function(d) {
+                return "translate(-20, 0)"
+            })
             .attr("transform", function(d) {
                 return "rotate(-65)"
             });
@@ -966,6 +981,7 @@ function countryComparison(dataset, display_year, country1, country2) {
             .attr("id", "year_text")
             .text(display_year);
         
+        // Holds array of data for country trace functionality.
         var holdSet = [];
         
         function trailer(countryInput) {
@@ -993,7 +1009,7 @@ function countryComparison(dataset, display_year, country1, country2) {
         }
     
         // Generate the visualisation
-        generateVis();
+        generateVis(false);
         
         // Runs loop for year.
         var currentYear = setInterval(stopStart, 2000);
@@ -1034,8 +1050,13 @@ function countryComparison(dataset, display_year, country1, country2) {
                 
             }
             
-            // Generate the visualisation
-            generateVis();
+            if (trail == false) {
+                // Generate the visualisation
+                generateVis(false);   
+            } else {
+                // Generate the visualisation
+                generateVis(true);
+            }
                
         }
 
@@ -1045,32 +1066,44 @@ function countryComparison(dataset, display_year, country1, country2) {
         // Start/Stop code for looping through each year.
         $("#stopStartButton").click(function() {
             if (playLoop === true) {
+                
                 clearInterval(currentYear);
-                //clearInterval(loopBars);
+                if (loopBars !== null) clearInterval(loopBars);
+                
                 $(this).text("Start");
                 playLoop = false;
+                
             } else {
+                
                 currentYear = setInterval(stopStart, 2000);
+                loopBars = setInterval(function(){ generateVisBar(countryNameBarChart, display_year); }, 2000);  
+                
                 $(this).text("Stop");
                 playLoop = true;
+                
             }
         });
 
         // For selecting a specific year from dropdown.
         $(".yearSelect").click(function() {
+            
             // Stop loop if running.
             if (playLoop === true) {
                 clearInterval(currentYear);
+                if (loopBars !== null) clearInterval(loopBars);
                 playLoop = false;
                 $("#stopStartButton").text("Start");
             }
 
             // Remove existing elements, particularly trailing elements.
             d3.select('svg').selectAll('circle').remove();
-            // Get year from canvas.
+            // Get year from box one canvas.
             display_year = parseInt($(this).text());
-            // Generate the visualisation
-            generateVis();
+            
+            // Generate the visualisations.
+            generateVis(false);
+            generateVisBar(countryNameBarChart, display_year);
+            
         });
 
         // Variable for holding country names.
@@ -1104,7 +1137,7 @@ function countryComparison(dataset, display_year, country1, country2) {
             // Get country name.
 			selectedCountry = $("#countrySelect option:selected").text();
             // Comparison bar chart
-			countryComparison(dataset, display_year, country, selectedCountry);
+			countryComparison(dataset, display_year, countryNameBarChart, selectedCountry);
 		});
         
         // Check if trail is checked or not.
