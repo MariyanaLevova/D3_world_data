@@ -6,9 +6,6 @@ function randomInt() {
     return Math.floor(Math.random() * Math.floor(10));
 }
 
-var selected_country;
-var country;
-
 d3.csv("GCI_CompleteData4.csv", function(error, data) {
 
     // Define margins
@@ -126,6 +123,15 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
     
     // Identifies whether trail feature is selected or not.
     var trail = false;
+    
+    // Holding loop data for comparison bars.
+    var comparisonLoop = null;
+    
+    // Variable for holding country names.
+    var selectedCountry;
+    
+    // Check if comparison feature is selected or not.
+    var comparisonCheck = false;
 
     // Primary year function for filtering all data except data for tracing path of country across canvas.
     function yearFilter(value) {
@@ -239,14 +245,6 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("dy", ".15em")
             .attr("transform", "rotate(-90)")
             .text("Pillar Value");
-
-        // SVG canvas background - makes first bar disappear
-        /**svgBar.append("rect")
-            .attr("x", "0")
-            .attr("y", "0")
-            .attr("fill", "#000")
-            .attr("height", "425px")
-            .attr("width", "925px");*/
 
         // SVG canvas year
         svgBar.append("text")
@@ -418,7 +416,12 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                     
                 } else {
                     // Remove canvas elements.
-                    clearInterval(loopBars);
+                    if (comparisonCheck === false) {
+                        clearInterval(loopBars);    
+                    } else {
+                        clearInterval(comparisonLoop);
+                    }
+                    
                     if (playLoop === true) {
                         // Runs loop for bars.
                         loopBars = setInterval(function(){ generateVisBar(d.Country, display_year); }, 2000);
@@ -665,12 +668,12 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             // Colours used to show multi-variate data.
             .style("fill", function(d, i) {
                 if (i % 2 == 0) {
-                    return "#74add1";
+                    return "#d73027";
                 } else {
                     return "#4575b4";
                 }
             })
-            .style("opacity", "0.8");
+            .style("opacity", "1");
 
         /******** HANDLE UPDATE SELECTION ************/
         // Append the rectangles for the bar chart
@@ -692,12 +695,12 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             // Colours used to show multi-variate data.
             .style("fill", function(d, i) {
                 if (i % 2 == 0) {
-                    return "#74add1";
+                    return "#d73027";
                 } else {
                     return "#4575b4";
                 }
             })
-            .style("opacity", "0.8");
+            .style("opacity", "1");
 
         /******** HANDLE EXIT SELECTION ************/
         // Remove bars that no longer have a matching data element
@@ -711,52 +714,15 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .text(function(d) {
                 return d.Year;
             });
-
-        // Controls the text labels at the top of each bar. 
-  /**      var barValues = svgBar.selectAll("#label")
-            .data(dataHold)
-            .enter()
-            .append("text")
-            .attr("class", "label")
-            .attr("x", (function(d) {
-                return xScaleBar(d.Column) + 5;
-            }))
-            .attr("y", function(d) {
-                return yScaleBar(d.Column) - 12;
-            })
-            .attr("dy", ".75em")
-            .text(function(d) {
-                return d.Column.toFixed(3);
-            });
-        barValues.transition()
-            .duration(500)
-            .ease(d3.easeCubic)
-            .attr("class", "label")
-            .attr("x", (function(d) {
-                return xScaleBar(d.Column) + 5;
-            }))
-            .attr("y", function(d) {
-                return yScaleBar(d.Column) - 12;
-            })
-            .attr("dy", ".75em")
-            .text(function(d) {
-                return d.Column.toFixed(3);
-            });
-        // This is not working i.e. the bar labels are not getting removed
-        barValues.exit()
-            .style("fill", "Red")
-            .transition()
-            .duration(500)
-            .attr("x", 0)
-            .attr("y", 0)
-            .remove();
-*/
+        
+        // Show bar chart legend.
+        $("#pill-box-one").css({"display": "block"});
+        $("#pill-one-text").text(countryNameBarChart);
+        
     }
 	
 	
-function countryComparison(dataset, display_year, country1, country2) {
-    
-        console.log(country2);
+function countryComparison() {
 	
         // Filter data per country per year
         // Year function.
@@ -766,15 +732,15 @@ function countryComparison(dataset, display_year, country1, country2) {
 	
 	        // Country1 function
         function countryFilter1(value) {
-            return (value.Country == country1);
+            return (value.Country == countryNameBarChart);
         }
 	
 	        // Country2 function
         function countryFilter2(value) {
-            return (value.Country == country2);
+            return (value.Country == selectedCountry);
         }
 
-        // Filter the data as before
+        // Filter the data.
         var filtered_dataset = dataset.filter(yearFilter);
         var country_filtered1 = filtered_dataset.filter(countryFilter1);
         var country_filtered2 = filtered_dataset.filter(countryFilter2);
@@ -840,7 +806,7 @@ function countryComparison(dataset, display_year, country1, country2) {
             // Could maybe use this to show a comparison between two countries?
             .style("fill", function(d, i) {
                 if (i % 2 == 0) {
-                    return "#74add1";
+                    return "#d73027";
                 } else {
                     return "#4575b4";
                 }
@@ -865,7 +831,7 @@ function countryComparison(dataset, display_year, country1, country2) {
             // Could maybe use this to show a comparison between two countries?
             .style("fill", function(d, i) {
                 if (i % 2 == 0) {
-                    return "#74add1";
+                    return "#d73027";
                 } else {
                     return "#4575b4";
                 }
@@ -881,7 +847,7 @@ function countryComparison(dataset, display_year, country1, country2) {
 			.attr("font-size", "20px")
 			.attr("fill", "000")
             .text(function(d) {
-                return d.Year + " " + country1 + " " + country2;
+                return d.Year;
             });
     
     }
@@ -926,6 +892,7 @@ function countryComparison(dataset, display_year, country1, country2) {
             return d.Global_Competitiveness_Index;
         });
 
+        // Scales for scatter plot.
         xScale.domain([100, max_gdp + 100000]);
         yScale.domain([1, max_gci + 1]);
 
@@ -933,6 +900,8 @@ function countryComparison(dataset, display_year, country1, country2) {
         var max_pop = d3.max(dataset, function(d) {
             return d.Population;
         });
+        
+        // Scale scatter plot radii. 
         radiusScale.domain([0, max_pop]);
 
         // Create the x-axis
@@ -1072,17 +1041,32 @@ function countryComparison(dataset, display_year, country1, country2) {
         $("#stopStartButton").click(function() {
             if (playLoop === true) {
                 
+                // Clear loop intervals, if running.
                 clearInterval(currentYear);
                 if (loopBars !== null) clearInterval(loopBars);
+                if (comparisonLoop !== null) clearInterval(comparisonLoop);
                 
+                // Update button text and play indicator.
                 $(this).text("Start");
                 playLoop = false;
                 
             } else {
                 
+                // Start scatter plot.
                 currentYear = setInterval(stopStart, 2000);
-                loopBars = setInterval(function(){ generateVisBar(countryNameBarChart, display_year); }, 2000);  
                 
+                // If comparison bar chart is not running, run single bar chart.
+                if (comparisonCheck === false) {
+                
+                        loopBars = setInterval(function(){ generateVisBar(countryNameBarChart, display_year); }, 2000);  
+                
+                } else {
+                    
+                        comparisonLoop = setInterval(countryComparison, 2000);
+                    
+                }
+                
+                // Update button text and play indicator.
                 $(this).text("Stop");
                 playLoop = true;
                 
@@ -1110,9 +1094,6 @@ function countryComparison(dataset, display_year, country1, country2) {
             generateVisBar(countryNameBarChart, display_year);
             
         });
-
-        // Variable for holding country names.
-		var selectedCountry;
         
         // Select2 dropdown for selecting countries to compare against.
         // Has search functionality provided by select2.
@@ -1139,10 +1120,19 @@ function countryComparison(dataset, display_year, country1, country2) {
 
         // On select2 change for country comparison.
 		$("#countrySelect").on("change", function() {
+            
             // Get country name.
 			selectedCountry = $("#countrySelect option:selected").text();
-            // Comparison bar chart
-			countryComparison(dataset, display_year, countryNameBarChart, selectedCountry);
+            
+            // Stop bar chart loop.
+            clearInterval(loopBars);
+            
+            // Comparison bar chart loop.
+            comparisonLoop = setInterval(countryComparison, 2000);
+            
+            // Set comparison indicator.
+            comparisonCheck = true;
+			
 		});
         
         // Check if trail is checked or not.
@@ -1231,8 +1221,10 @@ function countryComparison(dataset, display_year, country1, country2) {
             } else {
                 trail = true;
             }
-            
+
+            // Clear loop.
             clearInterval(currentYear);
+            // Start fresh loop.
             currentYear = setInterval(stopStart, 2000);
 		});
 
