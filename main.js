@@ -9,7 +9,7 @@ function randomInt() {
 var selected_country;
 var country;
 
-d3.csv("GCI_CompleteData2.csv", function(error, data) {
+d3.csv("GCI_CompleteData4.csv", function(error, data) {
 
     // Define margins
     var margin = {
@@ -45,7 +45,7 @@ d3.csv("GCI_CompleteData2.csv", function(error, data) {
     // Create an x-axis connected to the x scale.
     var xAxis = d3.axisBottom()
         .scale(xScale)
-        .ticks(4)
+        .ticks(3)
         .tickFormat(d3.format(",.2f"));
 
     // Define Y axis.
