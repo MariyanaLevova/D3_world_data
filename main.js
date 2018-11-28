@@ -338,7 +338,6 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 return d.Country;
             })
             .style("fill", function(d, i) {
-                //return colorBrewer[randomInt()];
                 return colorBrewer[regions.indexOf(d.Region)];
             })
             .style("opacity", function(d) { if(tracer === true) { return "0.3" } return "0.8" })
