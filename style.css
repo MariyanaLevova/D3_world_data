@@ -235,11 +235,11 @@ input:checked + .slider:before {
 }
 
 #pill-one {
-    background-color: #d73027;
+    background-color: #4575b4;
 }
 
 #pill-two {
-    background-color: #4575b4;
+    background-color: #d73027;
 }
 
 #year-legend {
@@ -247,6 +247,11 @@ input:checked + .slider:before {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 2em;
-    background-color: #fff;
+    margin-top: 5em;
+    color: #000;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+    text-align: center;
+    background-color: #d8d8d8;
 }

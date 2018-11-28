@@ -199,7 +199,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .tickFormat(xAxisBarChart)
             .tickSize(0);
 		
-		        // Create an x-axis connected to the x scale
+        // Create an x-axis connected to the x scale
         xAxisBarComparison = d3.axisBottom()
             .scale(xScaleBar)
             .tickFormat(xAxisBarChartComparison)
@@ -273,16 +273,19 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .duration(500)
             .ease(d3.easeLinear)
             .attr("cx", function(d) {
+                // Check for empty values.
                 if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return xScale(+d.GDP);
                 }
             })
             .attr("cy", function(d) {
+                // Check for empty values.
                 if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return yScale(+d.Global_Competitiveness_Index);
                 }
             })
             .attr("r", function(d, i) {
+                // Check for empty values.
                 if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return radiusScale(+d.Population);
                 }
@@ -304,16 +307,19 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .duration(500)
             .ease(d3.easeLinear)
             .attr("cx", function(d) {
+                // Check for empty values.
                 if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return xScale(+d.GDP);
                 }
             })
             .attr("cy", function(d) {
+                // Check for empty values.
                 if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return yScale(+d.Global_Competitiveness_Index);
                 }
             })
             .attr("r", function(d, i) {
+                // Check for empty values.
                 if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return radiusScale(+d.Population);
                 }
@@ -413,8 +419,10 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 } else {
                     // Remove canvas elements.
                     if (comparisonCheck === false) {
+                        // Clear single bar chart.
                         clearInterval(loopBars);    
                     } else {
+                        // Clear comparison bar chart.
                         clearInterval(comparisonLoop);
                     }
                     
@@ -595,7 +603,6 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
 		svgBar.select("#y-axis")
             .call(yAxisBar);
 
-
         // Country function
         function countryFilter(value) {
             return (value.Country == country);
@@ -755,7 +762,6 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
         
     }
 	
-	
 function countryComparison() {
 	
         // Filter data per country per year
@@ -764,12 +770,12 @@ function countryComparison() {
             return (value.Year == display_year);
         }
 	
-	        // Country1 function
+	    // Country1 function
         function countryFilter1(value) {
             return (value.Country == countryNameBarChart);
         }
 	
-	        // Country2 function
+	    // Country2 function
         function countryFilter2(value) {
             return (value.Country == selectedCountry);
         }
@@ -790,7 +796,7 @@ function countryComparison() {
             // It means in the D3 functions below I can just say d3.Column to call it.
             tempObj1["Column"] = country_filtered1[0][temp];
             tempObj2["Column"] = country_filtered2[0][temp];
-            // Append object to dataHold to create new row in array
+            // Append objects to dataHold to create new row in array.
             combinedData.push(tempObj1);
             combinedData.push(tempObj2);
         }
@@ -890,9 +896,7 @@ function countryComparison() {
                     .attr("height", "35px")
                     .attr("width", "100px")
                     .attr("id", "country-box");
-                // Add country name.
-
-			
+                
 			     svgBar.append("text")
                     .attr("x", coordinates[0] )
                     .attr("y", coordinates[1] + 10)
@@ -924,8 +928,6 @@ function countryComparison() {
                 d3.select("#bar-value").remove();
                 d3.select("#year").remove();
             })
-	
-	
     
     }
 
@@ -1297,6 +1299,7 @@ function countryComparison() {
                 $("#trailSelect").show();
                 $('#trailSelect').next(".select2-container").show();
                 if (trailChecked == true) {
+                    // Show toggle switch if trail feature selected.
                     $("#toggle-box").show();   
                 }
             }
