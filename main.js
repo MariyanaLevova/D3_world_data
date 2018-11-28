@@ -242,28 +242,16 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("y", "-25")
             .attr("dy", ".15em")
             .attr("transform", "rotate(-90)");
-
-        // SVG canvas year
-        svgBar.append("text")
-            .attr("x", "0")
-            .attr("y", "0")
-            .attr("dy", "1em")
-            .attr("font-size", "100px")
-            .attr("font-family", "sans-serif")
-            .attr("stroke", "#fff")
-            .attr("id", "year_text_two")
-            .text(display_year);
 		
 		svgBar.append("text")
-		            .attr("class", "removable")
-            .attr("id", "title")
-        .attr("x", (svg_width / 2))             
-        .attr("y", 0 - (margin.top / 2))
-        .attr("text-anchor", "middle")  
-        .style("font-size", "16px") 
-		.style("font-family", "helvetica")
-        .style("text-decoration", "underline")  
-        .text("12 Pillars");
+            .attr("id", "bar-chart-title")
+            .attr("x", (svg_width / 2))             
+            .attr("y", 0 - (margin.top / 2))
+            .attr("text-anchor", "middle")  
+            .style("font-size", "16px") 
+            .style("display", "none")
+            .style("font-family", "Montserrat, sans-serif")
+            .text("Competitve Index Pillars");
 
     }
     
@@ -577,6 +565,9 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 } else {
                     // Remove canvas elements.
                     clearInterval(loopBars);
+                    if (comparisonLoop !== null) clearInterval(comparisonLoop);
+                    
+                    // Check for 
                     if (playLoop === true) {
                         // Runs loop for bars.
                         loopBars = setInterval(loopBarChart(d.Country), 2000);
@@ -596,18 +587,13 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
     // Function to generate Bar Chart
     function generateVisBar(country, year) {
 		
-		
-
-			
-	//		svgBar.select("#title").remove();
-
+		//svgBar.select("#title").remove();
 		
 		// Call the axes
 		svgBar.select("#x-axis")
             .call(xAxisBar);
 		svgBar.select("#y-axis")
             .call(yAxisBar);
-//		.text("Pillar Value");
 
 
         // Country function
@@ -623,7 +609,6 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
         // Filter the data as before
         var filtered_dataset = dataset.filter(yearFilter);
         var country_filtered = filtered_dataset.filter(countryFilter);
-        //console.log(country_filtered);
 
         // Loop through every element in the filtered dataset and add to array dataHold
         // Doing this because otherwise the D3 functions only run once.
@@ -686,7 +671,6 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
 
         /******** HANDLE UPDATE SELECTION ************/
         // Append the rectangles for the bar chart
-
         bars
             .transition()
             .duration(500)
@@ -708,7 +692,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
         // Remove bars that no longer have a matching data element
         bars.exit().remove();
 
-// On mouse over event, trigger info display box
+        // On mouse over event, trigger info display box
         svgBar.selectAll("rect")
             .data(dataHold)
             .on("mouseover", function(d) {
@@ -724,9 +708,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                     .attr("height", "35px")
                     .attr("width", "100px")
                     .attr("id", "country-box");
-                // Add country name.
 
-			
 			     svgBar.append("text")
                     .attr("x", coordinates[0] )
                     .attr("y", coordinates[1] + 10)
@@ -757,7 +739,15 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 // Remove country population title.
                 d3.select("#bar-value").remove();
                 d3.select("#year").remove();
+            
             })
+        
+        // Show bar chart title.
+        $("#bar-chart-title").css({"display": "block"});
+        
+        // Update bar chart year.
+        $("#year-legend").css({"display": "block"});
+        $("#year-legend-text").text(display_year);
         
         // Show bar chart legend.
         $("#pill-box-one").css({"display": "block"});
@@ -767,7 +757,6 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
 	
 	
 function countryComparison() {
-	
 	
         // Filter data per country per year
         // Year function.
@@ -885,7 +874,7 @@ function countryComparison() {
         /******** HANDLE EXIT SELECTION ************/
         // Remove bars that no longer have a matching data element
         bars.exit().remove();
-// On mouse over event, trigger info display box
+        // On mouse over event, trigger info display box
         svgBar.selectAll("rect")
             .data(combinedData)
             .on("mouseover", function(d) {
