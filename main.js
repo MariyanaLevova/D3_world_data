@@ -1,5 +1,14 @@
 // ColorBrewer palette
-var colorBrewer = ["#a50026", "#d73027", "#f46d43", "#fdae61", "#fee090", "#ffffbf", "#e0f3f8", "#abd9e9", "#74add1", "#4575b4", "#313695"];
+//var colorBrewer = ["#a50026", "#d73027", "#f46d43", "#fdae61", "#fee090", "#ffffbf", "#e0f3f8", "#abd9e9", "#74add1", "#4575b4", "#313695"];
+var colorBrewer = ["#a50026", "#f46d43", "#fdae61", "#abd9e9",  "#74add1", "#4575b4", "#313695"];
+
+var regions = ["Europe and North America",
+"Middle East and North Africa",
+"Sub-Saharan Africa",
+"Latin America and the Caribbean",
+"Eurasia",
+"South Asia",
+"East Asia and Pacific"];
 
 // Retrieving random colour from ColorBrewer palette array
 function randomInt() {
@@ -294,7 +303,8 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 return d.Country;
             })
             .style("fill", function(d, i) {
-                return colorBrewer[randomInt()];
+                //return colorBrewer[randomInt()];
+                return colorBrewer[regions.indexOf(d.Region)];
             })
             .style("opacity", function(d) { if(tracer === true) { return "0.3" } return "0.8" });
 
@@ -328,7 +338,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 return d.Country;
             })
             .style("fill", function(d, i) {
-                return colorBrewer[randomInt()];
+                return colorBrewer[regions.indexOf(d.Region)];
             })
             .style("opacity", function(d) { if(tracer === true) { return "0.3" } return "0.8" })
             .style("cursor", "pointer");
@@ -662,7 +672,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
 			.attr("class", "bars")
             .transition()
             .duration(500)
-            .ease(d3.easeCubic)
+            .ease(d3.easeLinear)
             .attr("x", function(d, i) {
                 return xScaleBar(+d.Column);
             })
@@ -958,6 +968,7 @@ function countryComparison() {
             d['Market Size'] = +d['10th_pillar_Market_size'];
             d['Business Sophistication'] = +d['11th_pillar_Business_sophistication_'];
             d['Innovation'] = +d['12th_pillar_Innovation'];
+			d['Region'] = d['Forum classification'];
         });
 
         // Assign the data object loaded to the global dataset variable
