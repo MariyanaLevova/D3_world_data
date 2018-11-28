@@ -1,5 +1,13 @@
 // ColorBrewer palette
-var colorBrewer = ["#a50026", "#d73027", "#f46d43", "#fdae61", "#fee090", "#ffffbf", "#e0f3f8", "#abd9e9", "#74add1", "#4575b4", "#313695"];
+//var colorBrewer = ["#a50026", "#d73027", "#f46d43", "#fdae61", "#fee090", "#ffffbf", "#e0f3f8", "#abd9e9", "#74add1", "#4575b4", "#313695"];
+var colorBrewer = ["#a50026", "#f46d43", "#fdae61", "#abd9e9",  "#74add1", "#4575b4", "#313695"];
+ var regions = ["Europe and North America",
+"Middle East and North Africa",
+"Sub-Saharan Africa",
+"Latin America and the Caribbean",
+"Eurasia",
+"South Asia",
+"East Asia and Pacific"];
 
 // Retrieving random colour from ColorBrewer palette array
 function randomInt() {
@@ -249,6 +257,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("y", 0 - (margin.top / 2))
             .attr("text-anchor", "middle")  
             .style("font-size", "16px") 
+            .style("font-weight", "bold") 
             .style("display", "none")
             .style("font-family", "Montserrat, sans-serif")
             .text("Competitve Index Pillars");
@@ -294,7 +303,8 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 return d.Country;
             })
             .style("fill", function(d, i) {
-                return colorBrewer[randomInt()];
+                //return colorBrewer[randomInt()];
+                return colorBrewer[regions.indexOf(d.Region)];
             })
             .style("opacity", function(d) { if(tracer === true) { return "0.3" } return "0.8" });
 
@@ -328,7 +338,8 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 return d.Country;
             })
             .style("fill", function(d, i) {
-                return colorBrewer[randomInt()];
+                //return colorBrewer[randomInt()];
+                return colorBrewer[regions.indexOf(d.Region)];
             })
             .style("opacity", function(d) { if(tracer === true) { return "0.3" } return "0.8" })
             .style("cursor", "pointer");
@@ -417,13 +428,17 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                     }
                     
                 } else {
+                    
                     // Remove canvas elements.
                     if (comparisonCheck === false) {
                         // Clear single bar chart.
-                        clearInterval(loopBars);    
+                        clearInterval(loopBars);  
+                      
                     } else {
                         // Clear comparison bar chart.
                         clearInterval(comparisonLoop);
+                        comparisonCheck = false;
+                        
                     }
                     
                     if (playLoop === true) {
@@ -436,6 +451,26 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                         countryNameBarChart = d.Country;
                     }
                 }
+            
+                // Reset country select dropdown.
+                if ($("#countrySelect option:selected").text() != "") {
+                    // Set country comparison selector to null.
+                    $("#countrySelect").val('').trigger('change');   
+                }
+            
+                // Show bar chart title.
+                $("#bar-chart-title").css({"display": "block"});
+
+                // Show bar chart legend.
+                $("#pill-box-one").css({"display": "block"});
+                $("#pill-one-text").text(countryNameBarChart);
+
+                // Update bar chart year.
+                $("#year-legend").css({"display": "block"});
+
+                // Clear legend of comparison country.
+                $("#pill-two-text").empty();
+                $("#pill-box-two").hide();
             
                 // Scroll down to next SVG canvas.
                 $('html, body').animate({
@@ -557,34 +592,50 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 d3.select("#country-pop").remove();
             })
             .on("click", function(d) {
-
+            
                 var element =  document.getElementById('svgTwo');
                 if (element == null || element == undefined) {
                     // Create SVG canvas.
                     createBarCanvas();
                     if (playLoop === true) {
                         // Runs loop for bars.
-                        loopBars = setInterval(loopBarChart(d.Country), 2000);  
+                        loopBars = setInterval(function(){ generateVisBar(d.Country, display_year); }, 2000);  
+                        countryNameBarChart = d.Country;
                     } else {
                         // Bar chart, but not in loop as play button stopped.
-                        loopBarChart(d.Country);
+                        loopBars = loopBarChart(d.Country);
+                        countryNameBarChart = d.Country;
                     }
                     
                 } else {
                     // Remove canvas elements.
-                    clearInterval(loopBars);
-                    if (comparisonLoop !== null) clearInterval(comparisonLoop);
+                    if (comparisonCheck === false) {
+                        // Clear single bar chart.
+                        clearInterval(loopBars);    
+                    } else {
+                        // Clear comparison bar chart.
+                        clearInterval(comparisonLoop);
+                        comparisonCheck = false;
+                    }
                     
-                    // Check for 
                     if (playLoop === true) {
                         // Runs loop for bars.
-                        loopBars = setInterval(loopBarChart(d.Country), 2000);
+                        loopBars = setInterval(function(){ generateVisBar(d.Country, display_year); }, 2000);
+                        countryNameBarChart = d.Country;
                     } else {
                         // Bar chart, but not in loop as play button stopped.
-                        loopBarChart(d.Country);
+                        loopBars = loopBarChart(d.Country);
+                        countryNameBarChart = d.Country;
                     }
                 }
             
+                // Reset country select dropdown.
+                if ($("#countrySelect option:selected").text() != "") {
+                    // Set country comparison selector to null.
+                    $("#countrySelect").val('').trigger('change');   
+                }
+            
+                // Scroll down to bar chart.
                 $('html, body').animate({
                     scrollTop: $("#box-two").offset().top
                 }, 800);
@@ -662,7 +713,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
 			.attr("class", "bars")
             .transition()
             .duration(500)
-            .ease(d3.easeCubic)
+            .ease(d3.easeLinear)
             .attr("x", function(d, i) {
                 return xScaleBar(+d.Column);
             })
@@ -749,16 +800,8 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             
             })
         
-        // Show bar chart title.
-        $("#bar-chart-title").css({"display": "block"});
-        
-        // Update bar chart year.
-        $("#year-legend").css({"display": "block"});
+        // Update year.
         $("#year-legend-text").text(display_year);
-        
-        // Show bar chart legend.
-        $("#pill-box-one").css({"display": "block"});
-        $("#pill-one-text").text(countryNameBarChart);
         
     }
 	
@@ -929,6 +972,9 @@ function countryComparison() {
                 d3.select("#year").remove();
             })
     
+        // Update bar chart year.
+        $("#year-legend-text").text(display_year);
+    
     }
 
     // Error
@@ -958,6 +1004,7 @@ function countryComparison() {
             d['Market Size'] = +d['10th_pillar_Market_size'];
             d['Business Sophistication'] = +d['11th_pillar_Business_sophistication_'];
             d['Innovation'] = +d['12th_pillar_Innovation'];
+            d['Region'] = d['Forum classification'];
         });
 
         // Assign the data object loaded to the global dataset variable
@@ -1123,7 +1170,7 @@ function countryComparison() {
                 // Clear loop intervals, if running.
                 clearInterval(currentYear);
                 if (loopBars !== null) clearInterval(loopBars);
-                if (comparisonLoop !== null) clearInterval(comparisonLoop);
+                if (comparisonCheck !== false) clearInterval(comparisonLoop);
                 
                 // Update button text and play indicator.
                 $(this).text("Start");
@@ -1144,7 +1191,9 @@ function countryComparison() {
                     } else {
 
                             comparisonLoop = setInterval(countryComparison, 2000);
-
+                            comparisonCheck = true;
+                            console.log('fired');
+    
                     }
                 
                 }
@@ -1217,11 +1266,24 @@ function countryComparison() {
             // Stop bar chart loop.
             clearInterval(loopBars);
             
-            // Comparison bar chart loop.
-            comparisonLoop = setInterval(countryComparison, 2000);
+            if (playLoop === true) {
+            
+                // Comparison bar chart loop.
+                comparisonLoop = setInterval(countryComparison, 2000);
+                
+            } else {
+                
+                // Comparison bar chart without loop.
+                comparisonLoop = countryComparison();
+                
+            }
             
             // Set comparison indicator.
             comparisonCheck = true;
+            
+            // Show bar chart legend.
+            $("#pill-box-two").css({"display": "block"});
+            $("#pill-two-text").text(selectedCountry);
 			
 		});
         
@@ -1292,6 +1354,15 @@ function countryComparison() {
                 $('#trailSelect').next(".select2-container").hide();
                 $("#trailSelect").select2("close");
                 $("#toggle-box").hide();
+                if (loopBars !== null) {
+                    $("#pill-box-one").show();
+                    $("#year-legend").show();
+                }
+                if (comparisonCheck !== false) {
+                    if ($("#pill-two-text").text() != "") {
+                        $("#pill-box-two").show();   
+                    }
+                }
             } else {
                 $("#countrySelect").hide();
                 $('#countrySelect').next(".select2-container").hide();
@@ -1302,6 +1373,14 @@ function countryComparison() {
                     // Show toggle switch if trail feature selected.
                     $("#toggle-box").show();   
                 }
+                if (loopBars !== null) {
+                    $("#pill-box-one").hide();
+                    $("#year-legend").hide();
+                }
+                if (comparisonCheck !== false) {
+                    $("#pill-box-two").hide();
+                }
+                
             }
             
         });
