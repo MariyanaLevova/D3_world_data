@@ -283,7 +283,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .data(data_filtered)
             .transition()
             .duration(500)
-            .ease(d3.easeCubic)
+            .ease(d3.easeLinear)
             .attr("cx", function(d) {
                 if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return xScale(+d.GDP);
@@ -314,7 +314,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .append("circle")
             .transition()
             .duration(500)
-            .ease(d3.easeCubic)
+            .ease(d3.easeLinear)
             .attr("cx", function(d) {
                 if (d.GDP != "" && d.Global_Competitiveness_Index != "" && d.Population != "") {
                     return xScale(+d.GDP);
@@ -466,7 +466,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .append("ellipse")
             .transition()
             .duration(500)
-            .ease(d3.easeCubic)
+            .ease(d3.easeLinear)
             .attr("cx", function(d) {
                 if (d.GDP !== 0) {
                     return xScale(+d.GDP);
@@ -690,7 +690,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
         bars
             .transition()
             .duration(500)
-            .ease(d3.easeCubic)
+            .ease(d3.easeLinear)
             .attr("x", function(d, i) {
                 return xScaleBar(+d.Column);
             })
@@ -708,14 +708,56 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
         // Remove bars that no longer have a matching data element
         bars.exit().remove();
 
-        // Changes year on svg canvas.
-        svgBar.selectAll("#year_text_two")
-            .data(country_filtered)
-            .attr("x", "350")
-            .attr("y", "250")
-            .text(function(d) {
-                return d.Year;
-            });
+// On mouse over event, trigger info display box
+        svgBar.selectAll("rect")
+            .data(dataHold)
+            .on("mouseover", function(d) {
+                // Add country name.
+                var coordinates = d3.mouse(this);
+                // Population formatting
+                var f = d3.format(",");
+                // Remove country box.
+                svgBar.append("rect")
+                    .attr("x", coordinates[0] )
+                    .attr("y", coordinates[1] + 10)
+                    .attr("fill", "#fff")
+                    .attr("height", "35px")
+                    .attr("width", "100px")
+                    .attr("id", "country-box");
+                // Add country name.
+
+			
+			     svgBar.append("text")
+                    .attr("x", coordinates[0] )
+                    .attr("y", coordinates[1] + 10)
+                    .attr("dy", "1em")
+                    .attr("font-size", "13px")
+                    .attr("id", "year")
+                    .attr("font-family", "sans-serif")
+                    .attr("stroke", "#000")
+                    .attr("fill", "#000")
+                    .text(display_year);
+
+                // Add population.
+                svgBar.append("text")
+                    .attr("x", coordinates[0] )
+                    .attr("y", coordinates[1] + 30)
+                    .attr("dy", "1em")
+                    .attr("font-size", "11px")
+                    .attr("id", "bar-value")
+                    .attr("font-family", "sans-serif")
+                    .attr("stroke", "#000")
+                    .attr("fill", "#000")
+                    .text(d.Column.toFixed(3));
+            })
+            .on("mouseout", function(d) {
+    
+                // Remove country name.
+                d3.select("#country-box").remove();
+                // Remove country population title.
+                d3.select("#bar-value").remove();
+                d3.select("#year").remove();
+            })
         
         // Show bar chart legend.
         $("#pill-box-one").css({"display": "block"});
@@ -795,7 +837,7 @@ function countryComparison() {
 			.attr("class", "bars")
             .transition()
             .duration(500)
-            .ease(d3.easeCubic)
+            .ease(d3.easeLinear)
             .attr("x", function(d, i) {
                 return xScaleBar(+d.Column);
             })
@@ -820,7 +862,7 @@ function countryComparison() {
         bars
             .transition()
             .duration(500)
-            .ease(d3.easeCubic)
+            .ease(d3.easeLinear)
             .attr("x", function(d, i) {
                 return xScaleBar(+d.Column);
             })
@@ -843,15 +885,58 @@ function countryComparison() {
         /******** HANDLE EXIT SELECTION ************/
         // Remove bars that no longer have a matching data element
         bars.exit().remove();
+// On mouse over event, trigger info display box
+        svgBar.selectAll("rect")
+            .data(combinedData)
+            .on("mouseover", function(d) {
+                // Add country name.
+                var coordinates = d3.mouse(this);
+                // Population formatting
+                var f = d3.format(",");
+                // Remove country box.
+                svgBar.append("rect")
+                    .attr("x", coordinates[0] )
+                    .attr("y", coordinates[1] + 10)
+                    .attr("fill", "#fff")
+                    .attr("height", "35px")
+                    .attr("width", "100px")
+                    .attr("id", "country-box");
+                // Add country name.
 
-        // Changes year on svg canvas.
-        svgBar.selectAll("#year_text_two")
-            .data(country_filtered1)
-			.attr("font-size", "20px")
-			.attr("fill", "000")
-            .text(function(d) {
-                return d.Year;
-            });
+			
+			     svgBar.append("text")
+                    .attr("x", coordinates[0] )
+                    .attr("y", coordinates[1] + 10)
+                    .attr("dy", "1em")
+                    .attr("font-size", "13px")
+                    .attr("id", "year")
+                    .attr("font-family", "sans-serif")
+                    .attr("stroke", "#000")
+                    .attr("fill", "#000")
+                    .text(display_year);
+
+                // Add population.
+                svgBar.append("text")
+                    .attr("x", coordinates[0] )
+                    .attr("y", coordinates[1] + 30)
+                    .attr("dy", "1em")
+                    .attr("font-size", "11px")
+                    .attr("id", "bar-value")
+                    .attr("font-family", "sans-serif")
+                    .attr("stroke", "#000")
+                    .attr("fill", "#000")
+                    .text(+d.Column.toFixed(3));
+            })
+            .on("mouseout", function(d) {
+    
+                // Remove country name.
+                d3.select("#country-box").remove();
+                // Remove country population title.
+                d3.select("#bar-value").remove();
+                d3.select("#year").remove();
+            })
+	
+	
     
     }
 
@@ -1133,7 +1218,7 @@ function countryComparison() {
         });
 
         // On select2 change for country comparison.
-		$("#countrySelect").on("change", function() {
+		$("#countrySelect").on("select2:select", function() {
             
             // Get country name.
 			selectedCountry = $("#countrySelect option:selected").text();
