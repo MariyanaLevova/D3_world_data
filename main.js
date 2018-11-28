@@ -432,14 +432,8 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                         countryNameBarChart = d.Country;
                     }
                 }
-
-                // For looping through each year.
-                /*function loopBarChart() {
-                    // Generate the visualisation
-					country = d.Country;
-                    generateVisBar(d.Country, display_year);
-                }*/
             
+                // Scroll down to next SVG canvas.
                 $('html, body').animate({
                     scrollTop: $("#box-two").offset().top
                 }, 800);
@@ -667,11 +661,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             })
             // Colours used to show multi-variate data.
             .style("fill", function(d, i) {
-                if (i % 2 == 0) {
-                    return "#d73027";
-                } else {
-                    return "#4575b4";
-                }
+                return "#d73027";
             })
             .style("opacity", "1");
 
@@ -694,11 +684,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             })
             // Colours used to show multi-variate data.
             .style("fill", function(d, i) {
-                if (i % 2 == 0) {
-                    return "#d73027";
-                } else {
-                    return "#4575b4";
-                }
+                return "#d73027";
             })
             .style("opacity", "1");
 
@@ -1055,15 +1041,19 @@ function countryComparison() {
                 // Start scatter plot.
                 currentYear = setInterval(stopStart, 2000);
                 
-                // If comparison bar chart is not running, run single bar chart.
-                if (comparisonCheck === false) {
+                if (countryNameBarChart !== undefined) {
                 
-                        loopBars = setInterval(function(){ generateVisBar(countryNameBarChart, display_year); }, 2000);  
+                    // If comparison bar chart is not running, run single bar chart.
+                    if (comparisonCheck === false) {
+
+                            loopBars = setInterval(function(){ generateVisBar(countryNameBarChart, display_year); }, 2000);  
+                            
+                    } else {
+
+                            comparisonLoop = setInterval(countryComparison, 2000);
+
+                    }
                 
-                } else {
-                    
-                        comparisonLoop = setInterval(countryComparison, 2000);
-                    
                 }
                 
                 // Update button text and play indicator.
@@ -1086,12 +1076,19 @@ function countryComparison() {
 
             // Remove existing elements, particularly trailing elements.
             d3.select('svg').selectAll('circle').remove();
+            d3.select("svg").selectAll("ellipse").remove();
+            
             // Get year from box one canvas.
             display_year = parseInt($(this).text());
             
             // Generate the visualisations.
             generateVis(false);
-            generateVisBar(countryNameBarChart, display_year);
+            
+            // Generate bar chart if previously running.
+            if (countryNameBarChart !== undefined) {
+                // Generate the visualisations.
+                generateVisBar(countryNameBarChart, display_year);   
+            }
             
         });
         
@@ -1140,8 +1137,9 @@ function countryComparison() {
         
         // On select2 change for country trace.
 		$("#trailSelect").on("change", function() {
-            // Remove all existing nodes.
+            // Remove all existing nodes, including circles and ellipses.
             d3.select("svg").selectAll("circle").remove();
+            d3.select("svg").selectAll("ellipse").remove();
             
             // Update canvas text.
             d3.select('svg').selectAll("#year_text")
@@ -1216,16 +1214,20 @@ function countryComparison() {
         
         // On switch change.
 		$("#toggle-input").on("change", function() {
-            if ( trail == true) {
+            if (trail == true) {
                 trail = false;    
             } else {
                 trail = true;
             }
-
-            // Clear loop.
-            clearInterval(currentYear);
-            // Start fresh loop.
-            currentYear = setInterval(stopStart, 2000);
+            
+            // Control for start/stop button.
+            if (playLoop === true) {
+                // Clear loop.
+                clearInterval(currentYear);
+                // Start fresh loop.
+                currentYear = setInterval(stopStart, 2000);
+            }
+            
 		});
 
     }
