@@ -1,11 +1,12 @@
-// ColorBrewer palette.
+// ColorBrewer palette
 var colorBrewer = ["#a50026", "#d73027", "#f46d43", "#fdae61", "#fee090", "#ffffbf", "#e0f3f8", "#abd9e9", "#74add1", "#4575b4", "#313695"];
 
-// Retrieving random colour from ColorBrewer palette array.
+// Retrieving random colour from ColorBrewer palette array
 function randomInt() {
     return Math.floor(Math.random() * Math.floor(10));
 }
 
+// Load the data set
 d3.csv("GCI_CompleteData4.csv", function(error, data) {
 
     // Define margins
@@ -219,7 +220,6 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("class", "axis")
             .attr("id", "x-axis")
             .attr("transform", "translate(0," + svg_height + ")")
-            .call(xAxisBar)
             .append("text")
             .attr("font-family", "sans-serif")
             .attr("font-size", "20px")
@@ -228,13 +228,11 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("x", "440")
             .attr("y", "40")
             .attr("dy", ".15em");
-        //    .text("12 Pillars");
 
         // Create the y axis
         svgBar.append("g")
             .attr("class", "axis")
             .attr("id", "y-axis")
-            .call(yAxisBar)
             .append("text")
             .attr("font-family", "sans-serif")
             .attr("font-size", "20px")
@@ -243,8 +241,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("x", "-150")
             .attr("y", "-25")
             .attr("dy", ".15em")
-            .attr("transform", "rotate(-90)")
-            .text("Pillar Value");
+            .attr("transform", "rotate(-90)");
 
         // SVG canvas year
         svgBar.append("text")
@@ -256,6 +253,17 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("stroke", "#fff")
             .attr("id", "year_text_two")
             .text(display_year);
+		
+		svgBar.append("text")
+		            .attr("class", "removable")
+            .attr("id", "title")
+        .attr("x", (svg_width / 2))             
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")  
+        .style("font-size", "16px") 
+		.style("font-family", "helvetica")
+        .style("text-decoration", "underline")  
+        .text("12 Pillars");
 
     }
     
@@ -593,6 +601,20 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
     
     // Function to generate Bar Chart
     function generateVisBar(country, year) {
+		
+		
+
+			
+	//		svgBar.select("#title").remove();
+
+		
+		// Call the axes
+		svgBar.select("#x-axis")
+            .call(xAxisBar);
+		svgBar.select("#y-axis")
+            .call(yAxisBar);
+//		.text("Pillar Value");
+
 
         // Country function
         function countryFilter(value) {
@@ -665,14 +687,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("height", function(d, i) {
                 return svg_height - yScaleBar(+d.Column);
             })
-            // Colours used to show multi-variate data.
-            .style("fill", function(d, i) {
-                if (i % 2 == 0) {
-                    return "#d73027";
-                } else {
-                    return "#4575b4";
-                }
-            })
+            .style("fill", "#4575b4")
             .style("opacity", "1");
 
         /******** HANDLE UPDATE SELECTION ************/
@@ -692,14 +707,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("height", function(d) {
                 return svg_height - yScaleBar(+d.Column);
             })
-            // Colours used to show multi-variate data.
-            .style("fill", function(d, i) {
-                if (i % 2 == 0) {
-                    return "#d73027";
-                } else {
-                    return "#4575b4";
-                }
-            })
+            .style("fill", "#4575b4")
             .style("opacity", "1");
 
         /******** HANDLE EXIT SELECTION ************/
@@ -723,6 +731,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
 	
 	
 function countryComparison() {
+	
 	
         // Filter data per country per year
         // Year function.
