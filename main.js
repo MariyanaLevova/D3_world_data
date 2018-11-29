@@ -1,5 +1,7 @@
 // ColorBrewer palette
 var colorBrewer = ["#a50026", "#f46d43", "#fdae61", "#abd9e9", "#74add1", "#4575b4", "#313695"];
+
+// Regions defined by WEF.
 var regions = ["Europe and North America",
     "Middle East and North Africa",
     "Sub-Saharan Africa",
@@ -113,10 +115,12 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
         'Innovation'
     ];
 
+    // Plotting x-axis labels for single bar chart.
     var xAxisBarChart = function(d, i) {
         return columnNames[i] + " ";
     }
 
+    // Plotting x-axis labels for bar chart comparison.
     var xAxisBarChartComparison = function(d, i) {
         return columnNames2[i] + " ";
     }
@@ -174,6 +178,10 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
     var yAxisBar;
 
     function createBarCanvas() {
+        
+        /*
+        * Function for building canvas for bar chart.
+        */
 
         // Setting height of DIV containers.
         $("#box-b").css({
@@ -251,6 +259,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("dy", ".15em")
             .attr("transform", "rotate(-90)");
 
+        // Creates bar chart title.
         svgBar.append("text")
             .attr("id", "bar-chart-title")
             .attr("x", (svg_width / 2))
@@ -271,6 +280,10 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
     }
 
     function generateVis(tracer) {
+        
+        /*
+        * Function for setting the scatter plot.
+        */
 
         // Filter data for year.
         var data_filtered = dataset.filter(yearFilter);
@@ -300,13 +313,15 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 }
             })
             .attr("id", function(d) {
+                // Return country.
                 return d.Country;
             })
             .style("fill", function(d, i) {
-                //return colorBrewer[randomInt()];
+                // Return colour brewer palette according to region.
                 return colorBrewer[regions.indexOf(d.Region)];
             })
             .style("opacity", function(d) {
+                // Change opacity depending upon whether the tracer is running.
                 if (tracer === true) {
                     return "0.3"
                 }
@@ -340,12 +355,15 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 }
             })
             .attr("id", function(d) {
+                // Return country.
                 return d.Country;
             })
             .style("fill", function(d, i) {
+                // Return colour brewer palette according to region.
                 return colorBrewer[regions.indexOf(d.Region)];
             })
             .style("opacity", function(d) {
+                // Change opacity depending upon whether the tracer is running.
                 if (tracer === true) {
                     return "0.3"
                 }
@@ -422,6 +440,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             })
             .on("click", function(d) {
 
+                // Check if second canvas exists.
                 var element = document.getElementById('svgTwo');
                 if (element == null || element == undefined) {
                     // Create SVG canvas.
@@ -431,10 +450,12 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                         loopBars = setInterval(function() {
                             generateVisBar(d.Country, display_year);
                         }, 2000);
+                        // Assign country name to variable.
                         countryNameBarChart = d.Country;
                     } else {
                         // Bar chart, but not in loop as play button stopped.
                         loopBars = loopBarChart(d.Country);
+                        // Assign country name to variable.
                         countryNameBarChart = d.Country;
                     }
 
@@ -452,6 +473,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
 
                     }
 
+                    // Check if stop/start button is set.
                     if (playLoop === true) {
                         // Runs loop for bars.
                         loopBars = setInterval(function() {
@@ -509,6 +531,10 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
     }
 
     function generateVisTrail(points) {
+        
+        /*
+        * Function for setting the country path trace on the scatter plot.
+        */
 
         /******** HANDLE ENTER SELECTION ************/
         points
@@ -538,9 +564,11 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 }
             })
             .attr("class", function(d) {
+                // Country.
                 return d.Country;
             })
             .style("fill", function(d) {
+                // Return colour brewer palette.
                 return colorBrewer[1];
             })
             .style("stroke", function(d) {
@@ -612,6 +640,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             })
             .on("click", function(d) {
 
+                // Check if second canvas exists.
                 var element = document.getElementById('svgTwo');
                 if (element == null || element == undefined) {
                     // Create SVG canvas.
@@ -669,7 +698,9 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
     // Function to generate Bar Chart
     function generateVisBar(country, year) {
 
-        //svgBar.select("#title").remove();
+        /*
+        * Function for setting single bar chart.
+        */
 
         // Call the axes
         svgBar.select("#x-axis")
@@ -687,23 +718,28 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             return (value.Year == year);
         }
 
-        // Filter the data as before
+        // Filter the data using year and country filters.
         var filtered_dataset = dataset.filter(yearFilter);
         var country_filtered = filtered_dataset.filter(countryFilter);
 
-        // Loop through every element in the filtered dataset and add to array dataHold
-        // Doing this because otherwise the D3 functions only run once.
-        // The arrayHold will hold 12 objects each composed of one of the columns from the CSV
-        // The D3 functions will use arrayHold              // They will now iterate 12 times - one iteration for each column.
+        /* Multi-Variate Solution 
+        * Loop through every element in the filtered dataset and add to array dataHold.
+        * The arrayHold will hold 12 objects each composed of one of the columns from the CSV
+        * The D3 functions will use arrayHold.             
+        * They will now iterate 12 times - one iteration for each column, rather than one iteration for each row of data.
+        */
 
+        // Array to hold row data.
         dataHold = [];
+        // Loop through columns.
         for (i = 0; i < columnNames.length; i++) {
+            // Temporary variables for holding looped data.
             var temp = columnNames[i];
-            // Create object
+            // Create object.
             var tempObj = {};
-            // Add column to object with key = 'Column' and value = Innovation etc.
-            // The key value ('Column') is the same for all CSV columns
-            // It means in the D3 functions below I can just say d3.Column to call it.
+            // Add column to object with key = 'Column' and value = 'Innovation' etc.
+            // The key value ('Column') is the same for all CSV columns; anonymous values.
+            // Therefore, d3.Column can be used to call each data column.
             tempObj["Column"] = country_filtered[0][temp];
             // Append object to dataHold to create new row in array
             dataHold.push(tempObj);
@@ -713,6 +749,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
         xScaleBar.domain(dataHold.map(function(d, i) {
             return d.Column;
         }));
+        
         // Call the x-axis
         svgBar.select("#x-axis")
             .call(xAxisBar)
@@ -790,6 +827,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                     .attr("width", "100px")
                     .attr("id", "country-box");
 
+                // Year.
                 svgBar.append("text")
                     .attr("x", coordinates[0])
                     .attr("y", coordinates[1] + 10)
@@ -829,8 +867,12 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
     }
 
     function countryComparison() {
+        
+        /*
+        * Function for setting country comparison bar chart.
+        */
 
-        // Filter data per country per year
+        // Filter data per country per year.
         // Year function.
         function yearFilter(value) {
             return (value.Year == display_year);
@@ -850,16 +892,26 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
         var filtered_dataset = dataset.filter(yearFilter);
         var country_filtered1 = filtered_dataset.filter(countryFilter1);
         var country_filtered2 = filtered_dataset.filter(countryFilter2);
+        
+        /* Multi-Variate Solution 
+        * Loop through every element in the filtered dataset and add to array combinedData.
+        * The combinedData will hold 12 objects each composed of one of the columns from the CSV
+        * The D3 functions will use combinedData.             
+        * They will now iterate 12 times - one iteration for each column, rather than one iteration for each row of data.
+        */
 
+        // Array for holding combined data.
         var combinedData = [];
+        // For looping through columns.
         for (i = 0; i < columnNames.length; i++) {
+            // Temporary variable.
             var temp = columnNames[i];
             // Create object
             var tempObj1 = {};
             var tempObj2 = {};
-            // Add column to object with key = 'Column' and value = Innovation etc.
-            // The key value ('Column') is the same for all CSV columns
-            // It means in the D3 functions below I can just say d3.Column to call it.
+            // Add column to object with key = 'Column' and value = 'Innovation' etc.
+            // The key value ('Column') is the same for all CSV columns; anonymous values used.
+            // Therefore, d3.Column can be used to call each column.
             tempObj1["Column"] = country_filtered1[0][temp];
             tempObj2["Column"] = country_filtered2[0][temp];
             // Append objects to dataHold to create new row in array.
@@ -907,14 +959,15 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             })
             .attr("width", xScaleBar.bandwidth())
             .attr("height", function(d, i) {
+                // Scale height.
                 return svg_height - yScaleBar(+d.Column);
             })
-            // Could maybe use this to show a comparison between two countries?
             .style("fill", function(d, i) {
+                // Alternate colours for every second column.
                 if (i % 2 == 0) {
-                    return "#74add1";
-                } else {
                     return "#4575b4";
+                } else {
+                    return "#74add1";
                 }
             });
 
@@ -934,12 +987,12 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
             .attr("height", function(d) {
                 return svg_height - yScaleBar(+d.Column);
             })
-            // Could maybe use this to show a comparison between two countries?
             .style("fill", function(d, i) {
+                // Alternate colours for every second column.
                 if (i % 2 == 0) {
-                    return "#74add1";
+                    return "#4575b4"; 
                 } else {
-                    return "#4575b4";
+                    return "#74add1";
                 }
             });
 
@@ -963,6 +1016,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                     .attr("width", "100px")
                     .attr("id", "country-box");
 
+                // Update display year.
                 svgBar.append("text")
                     .attr("x", coordinates[0])
                     .attr("y", coordinates[1] + 10)
@@ -993,6 +1047,7 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 // Remove country population title.
                 d3.select("#bar-value").remove();
                 d3.select("#year").remove();
+            
             })
 
         // Update bar chart year.
@@ -1108,6 +1163,10 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
         var holdSet = [];
 
         function trailer(countryInput) {
+            
+            /*
+            * Function for trailing.
+            */
 
             //var countryName = countryInput;
             var yearInternal = 2007;
@@ -1122,7 +1181,9 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                 return (value.Country == countryInput);
             }
 
+            // Build data for trails.
             for (i = 0; i <= 12; i++) {
+                // Filter.
                 var countryFilterData = dataset.filter(countryFilter2)
                 var newData = svg.selectAll("circle").data(countryFilterData.filter(yearFilter2));
                 holdSet.push(newData);
@@ -1141,6 +1202,10 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
 
         // For looping through each year.
         function stopStart() {
+            
+            /*
+            * Function for controlling stop start button.
+            */
 
             // Update year.
             display_year = display_year + 1;
@@ -1209,12 +1274,14 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
                     // If comparison bar chart is not running, run single bar chart.
                     if (comparisonCheck === false) {
 
+                        // Set single bar chart loop.
                         loopBars = setInterval(function() {
                             generateVisBar(countryNameBarChart, display_year);
                         }, 2000);
 
                     } else {
 
+                        // Set country comparison loop.
                         comparisonLoop = setInterval(countryComparison, 2000);
                         comparisonCheck = true;
                     }
@@ -1233,10 +1300,15 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
 
             // Stop loop if running.
             if (playLoop === true) {
+                
+                // Clear loops.
                 clearInterval(currentYear);
                 if (loopBars !== null) clearInterval(loopBars);
+                
+                // Update stop/start button.
                 playLoop = false;
                 $("#stopStartButton").text("Start");
+                
             }
 
             // Remove existing elements, particularly trailing elements.
@@ -1412,6 +1484,8 @@ d3.csv("GCI_CompleteData4.csv", function(error, data) {
 
         // On switch change.
         $("#toggle-input").on("change", function() {
+            
+            // Check if trail is set.
             if (trail == true) {
                 trail = false;
             } else {
